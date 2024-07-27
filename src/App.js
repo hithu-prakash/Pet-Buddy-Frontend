@@ -15,13 +15,19 @@ import ResetPassword from "./components/userRegisteration/resetPassword";
 
 // '------------petParent----------------------'
 import PetParentForm from "./components/petParent/petParent-Form";
+import PetParentAccount from "./components/petParent/petParent-Account";
 
 //'------------careTaker----------------------'
 import CareTakerForm from "./components/careTaker/careTaker-Form"
 
+
+//'------------Pet----------------------'
+import PetForm from "./components/Pet/pet-Form";
+
 function App() {
 
   const {user,dispatch} = useAuth()
+  // const [isPetParentCreated, setIsPetParentCreated] = useState(false);
 
 
   const conditionalLinks=(path,roles) => {
@@ -36,6 +42,7 @@ function App() {
           return <Link to={path}>Create PetParent</Link> 
         }
       }
+      
     }
   }
 
@@ -64,10 +71,12 @@ function App() {
       ):(
         <>
         |<Link to='/account'>Account</Link>|
-        { conditionalLinks('/create-careTaker', ['admin', 'careTaker'])} |
-        { conditionalLinks('/create-petParent', ['admin', 'petParent'])} 
+        { conditionalLinks('/create-careTaker', ['admin', 'careTaker'])} 
+        { conditionalLinks('/create-petparent', ['admin', 'petParent'])} |
+        {/* { conditionalLinks('/create-pet',['admin','petParent'])} | */}
 
-        
+        <Link to='/parent-account'>Account</Link>|
+        <Link to='/create-pet'>Create Pet</Link> |
        
         <Link to='/' onClick={()=>{
           localStorage.removeItem('token')
@@ -99,6 +108,19 @@ function App() {
         <Route path="/create-petparent" element={
             <PrivateRoute permittedRoles={['petParent']}>
               <PetParentForm />
+            </PrivateRoute>
+          } />
+
+        <Route path="/parent-account" element={
+            <PrivateRoute permittedRoles={['petParent']}>
+              <PetParentAccount />
+            </PrivateRoute>
+          } />
+
+           {/* Pet */}
+        <Route path="/create-pet" element={
+            <PrivateRoute permittedRoles={['petParent']}>
+              <PetForm />
             </PrivateRoute>
           } />
       </Routes>

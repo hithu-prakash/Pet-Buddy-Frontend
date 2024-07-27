@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import axios from '../../config/axios';
+import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function PetParentForm(){
+
+    const navigate = useNavigate();
     const [form,setForm] = useState({
         address:'',
         parentPhoto:null,
@@ -39,9 +44,12 @@ export default function PetParentForm(){
                         Authorization:localStorage.getItem('token')
                     }
                 });
-                console.log(response.data);
+                console.log(response.data)
+                toast.success('PetParent created successfully!');
+                navigate('/PetParentAccount');
                 
-            } catch (err) {
+                
+              } catch(err) {
                
                 console.log(err);
                 const serverErrors = err.response && err.response.data ? err.response.data : 'An unexpected error occurred';

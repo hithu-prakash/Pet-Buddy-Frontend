@@ -48,7 +48,7 @@ export default function Login() {
     
     return (
         <div>
-            <h1>Login Here..</h1>
+            <h1>Login Here</h1>
             {serverErrors && <b>{serverErrors}</b>}
             <form onSubmit={formik.handleSubmit}>
                 <label htmlFor="email">Enter Email</label> <br />
