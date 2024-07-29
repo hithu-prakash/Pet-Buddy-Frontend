@@ -296,7 +296,7 @@ export default function Register(){
                 <Box height={35} />
                     <Box sx={center}>
                       <Avatar
-                        sx={{ ml: "45px", mb: "4px", bgcolor: "#ffffff" }}
+                        sx={{ ml: "45px", mb: "4px" }}
                       >
                         <LockOutlinedIcon />
                       </Avatar>
