@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+
 import axios from '../../config/axios';
 
-export default function CareTakerAccount () {
-    const { id } = useParams();
+export default function CareTakerAccount() {
+
     const [careTaker, setCareTaker] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ export default function CareTakerAccount () {
         };
 
         fetchCareTaker();
-    }, [id]);
+    }, []);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
@@ -38,21 +38,21 @@ export default function CareTakerAccount () {
                 <div className='care-taker-card'>
                     {careTaker.userId ? (
                         <>
-                            <h2>{careTaker.userId.username}</h2>
+                            <h2>Username:{careTaker.userId.username}</h2>
                             <p>Email: {careTaker.userId.email}</p>
                             <p>Phone: {careTaker.userId.phoneNumber}</p>
                         </>
                     ) : (
                         <p>User Information not available</p>
                     )}
-                    <p>Care-Taker Business Name: {careTaker.careTakerBusinessName}</p>
+                    <p>Business Name: {careTaker.businessName}</p>
                     <p>Address: {careTaker.address}</p>
                     <p>Bio: {careTaker.bio}</p>
                     <div>
                         <h3>Services:</h3>
-                        {careTaker.serviceCharges.map((charge, index) => (
+                        {careTaker && careTaker.serviceCharges && careTaker.serviceCharges.map((charge, index) => (
                             <div key={index}>
-                                <p>Service Name: {charge.name}</p>
+                                <p>Service Name: {charge.specialityName}</p>
                                 <p>Service Amount: {charge.amount}</p>
                                 <p>Service Time: {charge.time}</p>
                             </div>
@@ -64,11 +64,7 @@ export default function CareTakerAccount () {
                     </div>
                     <div>
                         <h3>Proof Document</h3>
-                        {careTaker.proof.endsWith('.pdf') ? (
-                            <a href={careTaker.proof} target='_blank' rel='noreferrer'>View PDF</a>
-                        ) : (
-                            <img src={careTaker.proof} alt='Proof' style={{ maxWidth: '200px' }} />
-                        )}
+                        <img src={careTaker.proof} alt='Profile' style={{ maxWidth: '200px' }} />
                     </div>
                 </div>
             ) : (

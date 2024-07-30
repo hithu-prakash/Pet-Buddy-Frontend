@@ -4,9 +4,9 @@ import axios from 'axios';
 export default function BookingForm  (){
   
   const [formValues, setFormValues] = useState({
-    userId: '',
-    caretakerId: '',
-    petId: '',
+    // userId: '',
+    // caretakerId: '',
+    // petId: '',
     parentId: '',
     category: '',
     date: '',
@@ -30,9 +30,7 @@ export default function BookingForm  (){
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
+      if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
