@@ -66,7 +66,7 @@ export default function CareTakerUpdate() {
     const runValidation = () => {
         const tempErrors = {};
         if (form.businessName.trim().length === 0) {
-            tempErrors.businessName = 'Care-Taker Business Name is required';
+            tempErrors.businessName = 'Business Name is required';
         }
         if (form.address.trim().length === 0) {
             tempErrors.address = 'Address is required';

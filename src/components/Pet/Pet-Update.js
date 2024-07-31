@@ -3,6 +3,7 @@ import axios from '../../config/axios'; // Adjust the path as needed
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Spinner from '../../utility/spinner';
 
 export default function PetUpdate() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ export default function PetUpdate() {
   useEffect(() => {
     const fetchPetData = async () => {
       try {
-        const response = await axios.get('/pet/singlePet', {
+        const response = await axios.get(`/pet/singlePet`, {
           headers: { Authorization: localStorage.getItem('token') },
         });
         console.log(response.data)
@@ -92,17 +93,21 @@ export default function PetUpdate() {
             formDataToSend.append(`${key}[${index}][${subKey}]`, item[subKey]);
           }
         });
-      } else if (typeof formData[key] === 'object' && formData[key] !== null) {
-        // Handle objects or arrays if necessary
+      } else if (typeof formData[key] === 'object' && formData[key] !== null && key !== 'petPhoto') {
+        // Handle objects if necessary, but not the petPhoto
         for (const subKey in formData[key]) {
           formDataToSend.append(`${key}[${subKey}]`, formData[key][subKey]);
         }
       } else {
-        formDataToSend.append(key, formData[key]);
+        if (key === 'petPhoto' && formData[key]) {
+          // Append the file directly for petPhoto
+          formDataToSend.append(key, formData[key]);
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
       }
     }
     console.log('FormData:', formDataToSend);
-
   
     try {
       const response = await axios.put(`/pet/update/${id}`, formDataToSend, {
@@ -115,12 +120,15 @@ export default function PetUpdate() {
       toast.success('Pet details updated successfully!');
       navigate('/pet-account');
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+      console.error(err);
+      setError({ fetch: 'Something went wrong' });
     }
   };
   
-  if (loading) return <div>Loading...</div>; // Show loading indicator if needed
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  
+
+  if (loading) return <Spinner />;
+  if (error) return <div>{error.fetch || error}</div>;
 
   return (
     <div>
@@ -200,6 +208,7 @@ export default function PetUpdate() {
           <label>Pet Photo:</label>
           <input
             type="file"
+            id='petPhoto'
             name="petPhoto"
             onChange={handleChange}
           />
@@ -322,7 +331,7 @@ export default function PetUpdate() {
         </div>
         <button type="submit">Update</button>
       </form>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div style={{ color: 'red' }}>{error.fetch}</div>}
       <ToastContainer />
     </div>
   );

@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Spinner from '../../utility/spinner'
+import Spinner from '../../utility/spinner';
 
 export default function CareTakerAccount() {
     const [careTaker, setCareTaker] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState({}); // Initialize as an empty object
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,8 +21,8 @@ export default function CareTakerAccount() {
                 });
                 setCareTaker(response.data);
                 setLoading(false);
-            } catch (error) {
-                console.error(error.message);
+            } catch (err) {
+                console.error(err.message);
                 setError({ fetch: 'Something went wrong' });
                 setLoading(false);
             }
@@ -44,24 +44,23 @@ export default function CareTakerAccount() {
                 if (response.status === 200) {
                     toast.success("Profile deleted successfully.");
                     alert("Profile deleted successfully.");
-                    setCareTaker('')
+                    setCareTaker(null); // Set to null instead of an empty string
                     navigate('/single-caretaker'); // Redirect after successful deletion
                 }
-            } catch (error) {
+            } catch (err) {
                 alert("Failed to delete profile. Please try again.");
-                console.error(error.message);
+                console.error(err.message);
             }
         }
     };
 
-
+    if (loading) return <Spinner />;
     if (error.fetch) return <div>{error.fetch}</div>;
 
     return (
         <div>
-             {loading && <Spinner />}
             <h2>CareTaker Details</h2>
-            {careTaker.businessName ? (
+            {careTaker ? (
                 <div className='care-taker-card'>
                     {careTaker.userId ? (
                         <>
@@ -95,7 +94,7 @@ export default function CareTakerAccount() {
                     </div>
                     <div>
                         <h3>Proof Document</h3>
-                        <img src={careTaker.proof} alt='Profile' style={{ maxWidth: '200px' }} />
+                        <img src={careTaker.proof} alt='Proof Document' style={{ maxWidth: '200px' }} />
                     </div>
                     <button onClick={() => navigate(`/update-caretaker/${careTaker._id}`)}>Update your Profile</button>
                     <button onClick={handleDelete}>Delete your Profile</button>

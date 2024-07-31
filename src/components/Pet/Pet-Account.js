@@ -97,6 +97,7 @@ export default function PetAccount() {
       ) : (
         <div>No Pet profile found.</div>
       )}
+        {error && <div style={{ color: 'red' }}>{error.fetch}</div>}
       <ToastContainer />
     </div>
   );
