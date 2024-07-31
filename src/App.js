@@ -16,15 +16,18 @@ import ResetPassword from "./components/userRegisteration/resetPassword";
 // '------------petParent----------------------'
 import PetParentForm from "./components/petParent/petParent-Form";
 import PetParentAccount from "./components/petParent/petParent-Account";
+import PetParentUpdate from "./components/petParent/pet-Parent-Update"
 
 //'------------careTaker----------------------'
 import CareTakerForm from "./components/careTaker/careTaker-Form"
 import CareTakerAccount from "./components/careTaker/careTaker-Account";
+import CareTakerUpdate from "./components/careTaker/careTaker-update"
 
 
 //'------------Pet----------------------'
 import PetForm from "./components/Pet/pet-Form";
 import PetAccount from "./components/Pet/Pet-Account";
+import PetUpdate from "./components/Pet/Pet-Update";
 
 
 //'------------Booking----------------------'
@@ -170,12 +173,16 @@ function App() {
 
   <Route path="/create-caretaker" element={<CareTakerForm/>}/>
   <Route path="/caretaker-account" element={<CareTakerAccount/>}/>
+  <Route path="/update-caretaker/:id" element={<CareTakerUpdate/>}/>
 
   <Route path="/create-petparent" element={<PetParentForm/>}/>
   <Route path="/petparent-account" element={<PetParentAccount/>}/>
+  <Route path="/update-petParent/:id" element={<PetParentUpdate/>}/>
+
 
   <Route path="/create-pet" element={<PetForm/>}/>
   <Route path='/pet-account' element={<PetAccount/>} />
+  <Route path="/update-pet/:id" element={<PetUpdate/>}/>
 
   <Route path="create-booking" element={<BookingForm/>} />
 </Routes>

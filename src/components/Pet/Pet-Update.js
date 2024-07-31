@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../../config/axios'; // Adjust the path as needed
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function PetForm() {
+export default function PetUpdate() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     petName: '',
     age: '',
     gender: '',
     categories: '',
     breed: '',
-    petPhoto: null, // Use null initially
+    petPhoto: null,
     weight: '',
     vaccinated: false,
     medication: [{ medicationName: '', description: '', dueDate: '', dose: '' }],
@@ -19,13 +22,42 @@ export default function PetForm() {
   });
 
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showMedicationDetails, setShowMedicationDetails] = useState(false);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchPetData = async () => {
+      try {
+        const response = await axios.get('/pet/singlePet', {
+          headers: { Authorization: localStorage.getItem('token') },
+        });
+        console.log(response.data)
+        const petData = response.data;
+        setFormData({
+          petName: petData.petName,
+          age: petData.age,
+          gender: petData.gender,
+          categories: petData.categories,
+          breed: petData.breed,
+          petPhoto: null, // You might need to handle URL or file upload differently
+          weight: petData.weight,
+          vaccinated: petData.vaccinated,
+          medication: petData.medication || [{ medicationName: '', description: '', dueDate: '', dose: '' }],
+          reminders: petData.reminders || [{ date: '', title: '', note: '' }],
+        });
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch pet data');
+        setLoading(false);
+      }
+    };
+
+    fetchPetData();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-  
+
     if (type === 'checkbox') {
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (type === 'file') {
@@ -44,7 +76,6 @@ export default function PetForm() {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleToggleMedicationDetails = () => {
     setShowMedicationDetails((prev) => !prev);
@@ -52,9 +83,8 @@ export default function PetForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const formDataToSend = new FormData();
-
     for (const key in formData) {
       if (Array.isArray(formData[key])) {
         formData[key].forEach((item, index) => {
@@ -62,29 +92,39 @@ export default function PetForm() {
             formDataToSend.append(`${key}[${index}][${subKey}]`, item[subKey]);
           }
         });
+      } else if (typeof formData[key] === 'object' && formData[key] !== null) {
+        // Handle objects or arrays if necessary
+        for (const subKey in formData[key]) {
+          formDataToSend.append(`${key}[${subKey}]`, formData[key][subKey]);
+        }
       } else {
         formDataToSend.append(key, formData[key]);
       }
     }
+    console.log('FormData:', formDataToSend);
 
+  
     try {
-      const response = await axios.post('/pet/create', formDataToSend, {
+      const response = await axios.put(`/pet/update/${id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: localStorage.getItem('token'),
         },
       });
       console.log(response.data);
-      toast.success('Pet Account created successfully!');
+      toast.success('Pet details updated successfully!');
       navigate('/pet-account');
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
     }
   };
+  
+  if (loading) return <div>Loading...</div>; // Show loading indicator if needed
+  if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
   return (
     <div>
-      <h1>Enter Pet Details</h1>
+      <h1>Update Pet Details</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Pet Name:</label>
@@ -280,9 +320,10 @@ export default function PetForm() {
           </div>
           <br />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">Update</button>
       </form>
       {error && <div style={{ color: 'red' }}>{error}</div>}
+      <ToastContainer />
     </div>
   );
 }
