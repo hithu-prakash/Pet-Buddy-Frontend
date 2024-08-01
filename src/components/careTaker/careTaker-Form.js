@@ -98,8 +98,10 @@ export default function CreateCareForm() {
                     }
                 });
                 console.log(response.data);
+                const id=response.data._id
+                console.log(id)
                 toast.success('CareTaker created successfully!');
-                navigate('/caretaker-account');
+                navigate(`/caretaker-account/${id}`);
         
             } catch (err) {
                 console.error('Submit Error:', err);

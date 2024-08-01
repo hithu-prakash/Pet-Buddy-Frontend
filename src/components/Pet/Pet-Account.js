@@ -93,6 +93,7 @@ export default function PetAccount() {
           )}
           <button onClick={() => navigate(`/update-pet/${pet._id}`)}>Update your Pet</button>
           <button onClick={handleDelete}>Delete your Pet</button>
+          <button onClick={() => navigate(`/caretaker-all`)}>Book CareTaker</button>
         </div>
       ) : (
         <div>No Pet profile found.</div>

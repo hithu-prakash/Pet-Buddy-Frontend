@@ -150,6 +150,7 @@ export default function PetParentAccount(){
                     </div>
                     <button onClick={() => navigate(`/update-petparent/${petParent._id}`)}>Update your Profile</button>
                     <button onClick={handleDelete}>Delete your Profile</button>
+                    <button onClick={() => navigate(`/create-pet/`)}>Add Pet Details</button>
                 </div>
             ) : (
                 <div>

@@ -1,36 +1,52 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-export default function BookingForm  (){
-  
+export default function BookingForm() {
   const [formValues, setFormValues] = useState({
-    // userId: '',
-    // caretakerId: '',
-    // petId: '',
     parentId: '',
     category: '',
-    date: '',
+    date: {
+      startTime: '',
+      endTime: ''
+    },
     totalAmount: '',
-    accepted: false
+    accepted: false,
+    serviceName: ''
   });
 
- 
   const [errors, setErrors] = useState({});
 
- 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    if (name === 'startTime' || name === 'endTime') {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        date: {
+          ...prevValues.date,
+          [name]: value
+        }
+      }));
+    } else {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
-  
+  const validateForm = () => {
+    const validationErrors = {};
+    if (!formValues.category) validationErrors.category = 'Category is required';
+    if (!formValues.date.startTime) validationErrors.startTime = 'Start time is required';
+    if (!formValues.date.endTime) validationErrors.endTime = 'End time is required';
+    if (!formValues.serviceName) validationErrors.serviceName = 'Service name is required';
+    return validationErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-      if (Object.keys(validationErrors).length > 0) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
@@ -38,16 +54,16 @@ export default function BookingForm  (){
     try {
       const response = await axios.post('/api/bookings', formValues);
       console.log('Booking successful:', response.data);
-     
       setFormValues({
-        userId: '',
-        caretakerId: '',
-        petId: '',
         parentId: '',
         category: '',
-        date:'',
+        date: {
+          startTime: '',
+          endTime: ''
+        },
         totalAmount: '',
-        accepted: false
+        accepted: false,
+        serviceName: ''
       });
       setErrors({});
     } catch (error) {
@@ -55,120 +71,85 @@ export default function BookingForm  (){
     }
   };
 
-  
   return (
     <div>
       <h1>Booking Form</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="userId">User ID</label>
-          <input
-            id="userId"
-            name="userId"
-            type="text"
-            value={formValues.userId}
-            onChange={handleChange}
-          />
-          {errors.userId && <div>{errors.userId}</div>}
+          <label htmlFor="category">Category</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                id="dog"
+                name="category"
+                value="dog"
+                checked={formValues.category === 'dog'}
+                onChange={handleChange}
+              />
+              Dog
+            </label>
+            <label>
+              <input
+                type="radio"
+                id="cat"
+                name="category"
+                value="cat"
+                checked={formValues.category === 'cat'}
+                onChange={handleChange}
+              />
+              Cat
+            </label>
+          </div>
+          {errors.category && <div>{errors.category}</div>}
         </div>
 
         <div>
-          <label htmlFor="caretakerId">CareTaker ID</label>
+          <label htmlFor="startTime">Start Time</label>
           <input
-            id="caretakerId"
-            name="caretakerId"
-            type="text"
-            value={formValues.caretakerId}
-            onChange={handleChange}
-          />
-          {errors.caretakerId && <div>{errors.caretakerId}</div>}
-        </div>
-
-        <div>
-          <label htmlFor="petId">Pet ID</label>
-          <input
-            id="petId"
-            name="petId"
-            type="text"
-            value={formValues.petId}
-            onChange={handleChange}
-          />
-          {errors.petId && <div>{errors.petId}</div>}
-        </div>
-
-        <div>
-          <label htmlFor="parentId">Parent ID</label>
-          <input
-            id="parentId"
-            name="parentId"
-            type="text"
-            value={formValues.parentId}
-            onChange={handleChange}
-          />
-          {errors.parentId && <div>{errors.parentId}</div>}
-        </div>
-
-        <div>
-  <label htmlFor="category">Category</label>
-  <div>
-    <label>
-      <input
-        type="radio"
-        id="dog"
-        name="category"
-        value="dog"
-        checked={formValues.category === 'dog'}
-        onChange={handleChange}
-      />
-      Dog
-    </label>
-    <label>
-      <input
-        type="radio"
-        id="cat"
-        name="category"
-        value="cat"
-        checked={formValues.category === 'cat'}
-        onChange={handleChange}
-      />
-      Cat
-    </label>
-  </div>
-  {errors.category && <div>{errors.category}</div>}
-</div>
-
-        <div>
-          <label htmlFor="date">Date</label>
-          <input
-            id="date"
-            name="date"
+            id="startTime"
+            name="startTime"
             type="datetime-local"
-            value={formValues.date}
+            value={formValues.date.startTime}
             onChange={handleChange}
           />
-          {errors.date && <div>{errors.date}</div>}
+          {errors.startTime && <div>{errors.startTime}</div>}
         </div>
 
-        
-        
         <div>
-          <label htmlFor="totalAmount">Total Amount</label>
+          <label htmlFor="endTime">End Time</label>
           <input
-            id="totalAmount"
-            name="totalAmount"
-            type="number"
-          
-            value={formValues.totalAmount}
+            id="endTime"
+            name="endTime"
+            type="datetime-local"
+            value={formValues.date.endTime}
             onChange={handleChange}
           />
-          {errors.totalAmount && <div>{errors.totalAmount}</div>}
+          {errors.endTime && <div>{errors.endTime}</div>}
         </div>
 
-        
+        <div>
+          <label htmlFor="serviceName">Select Service Name</label><br />
+          <select
+            name="serviceName"
+            value={formValues.serviceName}
+            onChange={handleChange}
+          >
+            <option value="">Select Service</option>
+            <option value="Pet-Boarding">Pet-Boarding</option>
+            <option value="Pet-Sitting">Pet-Sitting</option>
+            <option value="Pet-Walking">Pet-Walking</option>
+            <option value="Pet-Grooming">Pet-Grooming</option>
+            <option value="Pet-Taxi">Pet-Taxi</option>
+            <option value="Pet-Training">Pet-Training</option>
+            <option value="Vet-Consult">Vet-Consult</option>
+            <option value="Others">Others...</option>
+          </select>
+          {errors.serviceName && <div>{errors.serviceName}</div>}
+        </div>
+
         <button type="submit">Submit</button>
       </form>
     </div>
   );
-};
-
-
+}

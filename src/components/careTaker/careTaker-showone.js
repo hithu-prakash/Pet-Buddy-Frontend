@@ -5,10 +5,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Spinner from '../../utility/spinner';
 
-export default function CareTakerAccount() {
-    const {id} = useParams(); // Get the params object
-     // Extract id from params
-    console.log(id)
+export default function CareTakerShowOne() {
+    
     const [careTaker, setCareTaker] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState({}); // Initialize as an empty object
@@ -16,13 +14,9 @@ export default function CareTakerAccount() {
 
     useEffect(() => {
         const fetchCareTaker = async () => {
-            if (!id) {
-                setError({ fetch: 'Invalid ID' });
-                setLoading(false);
-                return;
-            }
+            
             try {
-                const response = await axios.get(`/careTaker/singlecareTaker/${id}`, { // Use id here
+                const response = await axios.get('/careTaker/single-care-taker', { // Use id here
                     headers: {
                         Authorization: `${localStorage.getItem('token')}`, // Ensure token format is correct
                     },
@@ -37,7 +31,7 @@ export default function CareTakerAccount() {
         };
 
         fetchCareTaker();
-    }, [id]); // Add id as a dependency to useEffect
+    }, []); // Add id as a dependency to useEffect
 
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete your profile?")) {

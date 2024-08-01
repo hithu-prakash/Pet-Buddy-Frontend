@@ -22,6 +22,8 @@ import PetParentUpdate from "./components/petParent/pet-Parent-Update"
 import CareTakerForm from "./components/careTaker/careTaker-Form"
 import CareTakerAccount from "./components/careTaker/careTaker-Account";
 import CareTakerUpdate from "./components/careTaker/careTaker-update"
+import CareTakerAll from "./components/careTaker/careTaker-All"
+import CareTakerShowOne from "./components/careTaker/careTaker-showone";
 
 
 //'------------Pet----------------------'
@@ -152,7 +154,8 @@ function App() {
   |<Link to='/petparent-account'>PetParentAccount</Link>
   |<Link to='/create-pet'>CreatePet</Link>
   |<Link to='/create-booking'>CreateBooking</Link>
-  |<Link to='/caretaker-account'>CareTakerAccount</Link>
+  |<Link to='/showcareTaker-one'>CareTakerAccount</Link>
+  |<Link to='/caretaker-account/:id'>CareTakerDetails</Link>
   |<Link to='/pet-account'>PetAccount</Link>
   |<Link to='/' onClick={()=>{
     localStorage.removeItem('token')
@@ -172,8 +175,10 @@ function App() {
   <Route path="/account" element={<Account/>}/>
 
   <Route path="/create-caretaker" element={<CareTakerForm/>}/>
-  <Route path="/caretaker-account" element={<CareTakerAccount/>}/>
+  <Route path="/caretaker-account/:id" element={<CareTakerAccount/>}/>
   <Route path="/update-caretaker/:id" element={<CareTakerUpdate/>}/>
+  <Route path="/caretaker-all" element={<CareTakerAll/>}/>
+  <Route path="/showcareTaker-one" element={<CareTakerShowOne/>}/>
 
   <Route path="/create-petparent" element={<PetParentForm/>}/>
   <Route path="/petparent-account" element={<PetParentAccount/>}/>
