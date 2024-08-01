@@ -1,37 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 export default function BookingForm() {
+  const { id } = useParams();
   const [formValues, setFormValues] = useState({
-    parentId: '',
     category: '',
-    date: {
-      startTime: '',
-      endTime: ''
-    },
+    date: { startTime: '', endTime: '' },
     totalAmount: '',
     accepted: false,
-    serviceName: ''
+    specialityName: '',
   });
-
   const [errors, setErrors] = useState({});
+  const [careTaker, setCareTaker] = useState({});
+  const [serviceCharges, setServiceCharges] = useState([]);
+
+  useEffect(() => {
+    const fetchCareTaker = async () => {
+      try {
+        const response = await axios.get(`/api/careTaker/${id}`);
+        setCareTaker(response.data);
+        setServiceCharges(response.data.serviceCharges);
+        // Set initial form values from the first service charge
+        if (response.data.serviceCharges.length > 0) {
+          const firstServiceCharge = response.data.serviceCharges[0];
+          setFormValues(prevValues => ({
+            ...prevValues,
+            specialityName: firstServiceCharge.specialityName,
+            totalAmount: firstServiceCharge.amount,
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching care taker:', error.response || error.message);
+      }
+    };
+
+    fetchCareTaker();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'startTime' || name === 'endTime') {
-      setFormValues((prevValues) => ({
+      setFormValues(prevValues => ({
         ...prevValues,
-        date: {
-          ...prevValues.date,
-          [name]: value
-        }
+        date: { ...prevValues.date, [name]: value },
       }));
     } else {
-      setFormValues((prevValues) => ({
+      setFormValues(prevValues => ({
         ...prevValues,
-        [name]: type === 'checkbox' ? checked : value
+        [name]: type === 'checkbox' ? checked : value,
       }));
     }
+  };
+
+  const handleSpecialityChange = (e) => {
+    const { value } = e.target;
+    const selectedService = serviceCharges.find(service => service.specialityName === value);
+    setFormValues(prevValues => ({
+      ...prevValues,
+      specialityName: value,
+      totalAmount: selectedService ? selectedService.amount : ''
+    }));
   };
 
   const validateForm = () => {
@@ -39,7 +68,6 @@ export default function BookingForm() {
     if (!formValues.category) validationErrors.category = 'Category is required';
     if (!formValues.date.startTime) validationErrors.startTime = 'Start time is required';
     if (!formValues.date.endTime) validationErrors.endTime = 'End time is required';
-    if (!formValues.serviceName) validationErrors.serviceName = 'Service name is required';
     return validationErrors;
   };
 
@@ -50,24 +78,19 @@ export default function BookingForm() {
       setErrors(validationErrors);
       return;
     }
-
     try {
-      const response = await axios.post('/api/bookings', formValues);
+      const response = await axios.post(`/api/booking/create/careTaker/${caretakerId}`, formValues);
       console.log('Booking successful:', response.data);
       setFormValues({
-        parentId: '',
         category: '',
-        date: {
-          startTime: '',
-          endTime: ''
-        },
+        date: { startTime: '', endTime: '' },
         totalAmount: '',
         accepted: false,
-        serviceName: ''
+        specialityName: '',
       });
       setErrors({});
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      console.error('Error submitting booking:', error.response || error.message);
     }
   };
 
@@ -103,7 +126,6 @@ export default function BookingForm() {
           </div>
           {errors.category && <div>{errors.category}</div>}
         </div>
-
         <div>
           <label htmlFor="startTime">Start Time</label>
           <input
@@ -115,7 +137,6 @@ export default function BookingForm() {
           />
           {errors.startTime && <div>{errors.startTime}</div>}
         </div>
-
         <div>
           <label htmlFor="endTime">End Time</label>
           <input
@@ -127,27 +148,25 @@ export default function BookingForm() {
           />
           {errors.endTime && <div>{errors.endTime}</div>}
         </div>
-
         <div>
-          <label htmlFor="serviceName">Select Service Name</label><br />
+          <label htmlFor="specialityName">Speciality Name</label>
           <select
-            name="serviceName"
-            value={formValues.serviceName}
-            onChange={handleChange}
+            id="specialityName"
+            name="specialityName"
+            value={formValues.specialityName}
+            onChange={handleSpecialityChange}
           >
-            <option value="">Select Service</option>
-            <option value="Pet-Boarding">Pet-Boarding</option>
-            <option value="Pet-Sitting">Pet-Sitting</option>
-            <option value="Pet-Walking">Pet-Walking</option>
-            <option value="Pet-Grooming">Pet-Grooming</option>
-            <option value="Pet-Taxi">Pet-Taxi</option>
-            <option value="Pet-Training">Pet-Training</option>
-            <option value="Vet-Consult">Vet-Consult</option>
-            <option value="Others">Others...</option>
+            <option value="">Select a service</option>
+            {serviceCharges.map((service, index) => (
+              <option key={index} value={service.specialityName}>
+                {service.specialityName}
+              </option>
+            ))}
           </select>
-          {errors.serviceName && <div>{errors.serviceName}</div>}
         </div>
-
+        <div>
+          <p>Total Amount: {formValues.totalAmount}</p>
+        </div>
         <button type="submit">Submit</button>
       </form>
     </div>

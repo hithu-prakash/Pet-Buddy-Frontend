@@ -27,6 +27,7 @@ export default function CareTakerAccount() {
                         Authorization: `${localStorage.getItem('token')}`, // Ensure token format is correct
                     },
                 });
+                console.log(response.data)
                 setCareTaker(response.data);
                 setLoading(false);
             } catch (err) {
@@ -112,7 +113,9 @@ export default function CareTakerAccount() {
                     <p>No CareTaker profile found.</p>
                     <button onClick={() => navigate(`/create-caretaker`)}>Create Care-Taker Profile</button>
                 </div>
+                
             )}
+            <button onClick={() => navigate(`/create-booking/${careTaker._id}`)}>Book CareTaker</button>
             <ToastContainer />
         </div>
     );

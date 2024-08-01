@@ -189,7 +189,7 @@ function App() {
   <Route path='/pet-account' element={<PetAccount/>} />
   <Route path="/update-pet/:id" element={<PetUpdate/>}/>
 
-  <Route path="create-booking" element={<BookingForm/>} />
+  <Route path="/create-booking/:id" element={<BookingForm/>} />
 </Routes>
 </div>
 ) 
