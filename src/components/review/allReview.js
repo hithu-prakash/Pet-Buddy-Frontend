@@ -1,43 +1,78 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import fetchReviews from '../review/createReview';
-import { Container, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import axios from '../../config/axios';
+import { Container, Typography, Card, CardContent, CircularProgress, Grid } from '@mui/material';
+import Rating from '@mui/material/Rating';
 
-export default function ReviewList() {
-  const dispatch = useDispatch();
-  const reviewState = useSelector((state) => state.review);
+export default function ReviewsList() {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    dispatch(fetchReviews());
-  }, [dispatch]);
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get('/all/review');
+        setReviews(response.data);
+        console.log(response.data)
+      } catch (error) {
+        setError('Error fetching reviews');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
     <Container>
-      {reviewState.loading && <CircularProgress />}
-      {reviewState.error && (
-        <Typography color="error">
-          Error: {reviewState.error}
-        </Typography>
-      )}
-      {reviewState.reviews.map((review) => (
-        <Card key={review._id} sx={{ marginBottom: 2 }}>
-          <CardContent>
-            <Typography variant="h6">
-              Rating: {review.ratings}
-            </Typography>
-            <Typography>
-              {review.description}
-            </Typography>
-            {review.photos && (
-              <img
-                src={review.photos}
-                alt="Review"
-                style={{ width: '100%', marginTop: '10px' }}
-              />
-            )}
-          </CardContent>
-        </Card>
-      ))}
+      <Typography variant="h4" component="h1" gutterBottom>
+        Reviews
+      </Typography>
+      <Grid container spacing={3}>
+        {reviews.map((review) => (
+          <Grid item xs={12} sm={6} md={4} key={review._id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h5" component="div">
+                  {review.userId.username}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {review.description}
+                </Typography>
+                <Rating value={review.ratings} readOnly />
+                {review.photos && (
+                  <img
+                    src={review.photos}
+                    alt="Review"
+                    style={{ width: '100%', marginTop: '10px' }}
+                  />
+                )}
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  Caretaker: {review.caretakerId.businessName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {/* Pet: {review.petId.petName} */}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Rating: {review.ratings}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
-}
+};
+
+

@@ -18,19 +18,22 @@ import PetParentForm from "./components/petParent/petParent-Form";
 import PetParentAccount from "./components/petParent/petParent-Account";
 import PetParentUpdate from "./components/petParent/pet-Parent-Update"
 import PetParentList from "./components/petParent/pet-Parent-All"
+import PetParentId from "./components/petParent/pet-parent-Id"
 
 //'------------careTaker----------------------'
 import CareTakerForm from "./components/careTaker/careTaker-Form"
 import CareTakerAccount from "./components/careTaker/careTaker-Account";
 import CareTakerUpdate from "./components/careTaker/careTaker-update"
 import CareTakerAll from "./components/careTaker/careTaker-All"
-import CareTakerShowOne from "./components/careTaker/careTaker-showone";
+import CareTakerShowOne from "./components/careTaker/careTaker-showone-id";
+import CareTakerSingleDetails from "./components/careTaker/careTaker-showone-id";
 
 
 //'------------Pet----------------------'
 import PetForm from "./components/Pet/pet-Form";
 import PetAccount from "./components/Pet/Pet-Account";
 import PetUpdate from "./components/Pet/Pet-Update";
+
 
 
 //'------------Booking----------------------'
@@ -43,6 +46,14 @@ import AllBooking from "./components/booking/booking-history"
 //'----------Review--------------------------'
 import CreateReview from "./components/review/createReview"
 import ReviewList from "./components/review/allReview"
+
+
+//'-----------------admin--------------------'
+import CaretakerList from "./components/admin/careTakerAll"
+import PetParentsList from "./components/admin/petParentsAll"
+import PetsList from "./components/admin/petAll"
+import AdminHomePage from "./components/admin/admin-homePage";
+import HappyParents from "./components/admin/HappyParents";
 
 
 function App() {
@@ -95,6 +106,7 @@ function App() {
   |<Link to='/account'>Account</Link>|
   {/* |<Link to='/create-caretaker'>Create-Caretaker</Link>
   |<Link to='/create-petparent'>Create-PetParent</Link> */}
+  |<Link to="/admin-homePage">AdminHomePage</Link>
     |<Link to='/all-petparents'>PetParentList</Link>
   |<Link to='/petparent-account'>PetParentAccount</Link>
   |<Link to='/create-review/:id'>CreateReview</Link>
@@ -125,12 +137,14 @@ function App() {
   <Route path="/caretaker-account/:id" element={<CareTakerAccount/>}/>
   <Route path="/update-caretaker/:id" element={<CareTakerUpdate/>}/>
   <Route path="/caretaker-all" element={<CareTakerAll/>}/>
-  <Route path="/showcareTaker-one" element={<CareTakerShowOne/>}/>
+  {/* <Route path="/showcareTaker/:id" element={<CareTakerShowOne/>}/> */}
+  <Route path="/caretaker-single/:id" element={<CareTakerSingleDetails/>}/>
 
   <Route path="/create-petparent" element={<PetParentForm/>}/>
   <Route path="/petparent-account" element={<PetParentAccount/>}/>
   <Route path="/update-petParent/:id" element={<PetParentUpdate/>}/>
   <Route path="/all-petParents" element={<PetParentList/>} />
+  <Route path="/petparent/:id" element={<PetParentId/>}/>
 
 
   <Route path="/create-pet" element={<PetForm/>}/>
@@ -143,6 +157,15 @@ function App() {
 
   <Route path="/create-review/:id" element={<CreateReview/>}/>
   <Route path="/all-review" element={<ReviewList/>}/>
+
+
+  <Route path="/careTaker-false" element={<CaretakerList/>} />
+  <Route path="/parent-all" element={<PetParentsList/>}/>
+  <Route path="/pet-all" element={<PetsList/>}/>
+  <Route path="/admin-homePage" element={<AdminHomePage/>}/>
+  <Route path="/happy-Parents" element={<HappyParents/>}/>
+
+
 </Routes>
 </div>
 ) 

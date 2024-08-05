@@ -46,7 +46,7 @@ export default function PetParentForm(){
                 });
                 console.log(response.data)
                 toast.success('PetParent created successfully!');
-                navigate('/PetParentAccount');
+                navigate('/petparent-account');
                 
                 
               } catch(err) {

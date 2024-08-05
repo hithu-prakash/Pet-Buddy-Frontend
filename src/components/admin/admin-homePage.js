@@ -1,13 +1,33 @@
 import React from 'react';
 import { Container, Typography, Box, Button, Grid, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import bgg from '../../photos/bgg.jpg'; // Correct path and extension
 
 export default function Home() {
     const navigate = useNavigate();
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Paper elevation={3} sx={{ padding: 4, textAlign: 'center' }}>
+        <Container
+            maxWidth="md"
+            sx={{
+                py: 4,
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundImage: `url(${bgg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+            }}
+        >
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: 4,
+                    textAlign: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white background for better readability
+                }}
+            >
                 <Typography variant="h2" component="h1" gutterBottom>
                     Welcome to PetBuddy
                 </Typography>
@@ -38,7 +58,7 @@ export default function Home() {
                             <Button 
                                 variant="outlined" 
                                 color="primary" 
-                                onClick={() => navigate('/pet-parents')}
+                                onClick={() => navigate('/register-parents')}
                             >
                                 Pet Parents
                             </Button>
