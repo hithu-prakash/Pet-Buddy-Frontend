@@ -17,6 +17,7 @@ import ResetPassword from "./components/userRegisteration/resetPassword";
 import PetParentForm from "./components/petParent/petParent-Form";
 import PetParentAccount from "./components/petParent/petParent-Account";
 import PetParentUpdate from "./components/petParent/pet-Parent-Update"
+import PetParentList from "./components/petParent/pet-Parent-All"
 
 //'------------careTaker----------------------'
 import CareTakerForm from "./components/careTaker/careTaker-Form"
@@ -34,6 +35,15 @@ import PetUpdate from "./components/Pet/Pet-Update";
 
 //'------------Booking----------------------'
 import BookingForm from "./components/booking/booking-form"
+import BookingSingleDetails from "./components/booking/booking-single";
+import AllBooking from "./components/booking/booking-history"
+
+
+
+//'----------Review--------------------------'
+import CreateReview from "./components/review/createReview"
+import ReviewList from "./components/review/allReview"
+
 
 function App() {
 
@@ -71,72 +81,6 @@ function App() {
   },[])
   
   return(
-//     <div >
-//       <h1>PetBuddy</h1>
-//       <Link to='/'>Home</Link>
-//       {!user.isLoggedIn ?(
-//         <>
-//         |<Link to='/register'>Register</Link>|
-//         <Link to='/login'>Login</Link>
-//         </>
-//       ):(
-//         <>
-//         |<Link to='/account'>Account</Link>|
-//         { conditionalLinks('/create-careTaker', ['admin', 'careTaker'])} 
-//         { conditionalLinks('/create-petparent', ['admin', 'petParent'])} |
-//         {/* { conditionalLinks('/create-pet',['admin','petParent'])} | */}
-
-//         <Link to='/parent-account'>Account</Link>|
-//         <Link to='/create-pet'>Create Pet</Link> |
-       
-//         <Link to='/' onClick={()=>{
-//           localStorage.removeItem('token')
-//           dispatch({type:'LOGOUT'})
-//         }}>Logout</Link>
-//         </>
-//       )}
-//       <Routes>
-//         <Route path="/" element={<Home/>} />
-//         <Route path="/register" element={<Register/>} />
-//         <Route path="/verify-OTP" element={<VerifyOTP/>} />
-//         <Route path="/login" element={<Login/>} />
-//         <Route path="/forget-password" element={<ForgetPassword/>}/>
-//         <Route path="/reset-password" element={<ResetPassword/>}/>
-//         <Route path="/Account" element={
-//             <PrivateRoute permittedRoles={['careTaker', 'petParent']}>
-//               <Account />
-//             </PrivateRoute>
-//           } />
-//  {/* CareTaker */}
-//         <Route path="/create-caretaker" element={
-//             <PrivateRoute permittedRoles={['careTaker']}>
-//               <CareTakerForm />
-//             </PrivateRoute>
-//           } />
-
-        
-//         {/* PetParent */}
-//         <Route path="/create-petparent" element={
-//             <PrivateRoute permittedRoles={['petParent']}>
-//               <PetParentForm />
-//             </PrivateRoute>
-//           } />
-
-//         <Route path="/parent-account" element={
-//             <PrivateRoute permittedRoles={['petParent']}>
-//               <PetParentAccount />
-//             </PrivateRoute>
-//           } />
-
-//            {/* Pet */}
-//         <Route path="/create-pet" element={
-//             <PrivateRoute permittedRoles={['petParent']}>
-//               <PetForm />
-//             </PrivateRoute>
-//           } />
-//       </Routes>
-//     </div>
-  
 
 <div >
 <h1>PetBuddy</h1>
@@ -149,14 +93,17 @@ function App() {
 ):(
   <>
   |<Link to='/account'>Account</Link>|
-  |<Link to='/create-caretaker'>Create-Caretaker</Link>
-  |<Link to='/create-petparent'>Create-PetParent</Link>
+  {/* |<Link to='/create-caretaker'>Create-Caretaker</Link>
+  |<Link to='/create-petparent'>Create-PetParent</Link> */}
+    |<Link to='/all-petparents'>PetParentList</Link>
   |<Link to='/petparent-account'>PetParentAccount</Link>
-  |<Link to='/create-pet'>CreatePet</Link>
-  |<Link to='/create-booking'>CreateBooking</Link>
+  |<Link to='/create-review/:id'>CreateReview</Link>
+ 
+ 
   |<Link to='/showcareTaker-one'>CareTakerAccount</Link>
   |<Link to='/caretaker-account/:id'>CareTakerDetails</Link>
   |<Link to='/pet-account'>PetAccount</Link>
+  
   |<Link to='/' onClick={()=>{
     localStorage.removeItem('token')
     dispatch({type:'LOGOUT'})
@@ -183,6 +130,7 @@ function App() {
   <Route path="/create-petparent" element={<PetParentForm/>}/>
   <Route path="/petparent-account" element={<PetParentAccount/>}/>
   <Route path="/update-petParent/:id" element={<PetParentUpdate/>}/>
+  <Route path="/all-petParents" element={<PetParentList/>} />
 
 
   <Route path="/create-pet" element={<PetForm/>}/>
@@ -190,6 +138,11 @@ function App() {
   <Route path="/update-pet/:id" element={<PetUpdate/>}/>
 
   <Route path="/create-booking/:id" element={<BookingForm/>} />
+  <Route path="/booking-details/:id" element={<BookingSingleDetails/>}/>
+
+
+  <Route path="/create-review/:id" element={<CreateReview/>}/>
+  <Route path="/all-review" element={<ReviewList/>}/>
 </Routes>
 </div>
 ) 

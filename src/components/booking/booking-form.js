@@ -1,174 +1,177 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from '../../config/axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function BookingForm() {
   const { id } = useParams();
-  const [formValues, setFormValues] = useState({
-    category: '',
-    date: { startTime: '', endTime: '' },
-    totalAmount: '',
-    accepted: false,
-    specialityName: '',
-  });
+  const navigate = useNavigate(); // Import and initialize useNavigate
+  const [specialityName, setSpecialityName] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [services, setServices] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [bookingDurationInHours, setBookingDurationInHours] = useState(0);
+  const [businessName, setBusinessName] = useState('');
   const [errors, setErrors] = useState({});
-  const [careTaker, setCareTaker] = useState({});
-  const [serviceCharges, setServiceCharges] = useState([]);
 
   useEffect(() => {
-    const fetchCareTaker = async () => {
+    const fetchCaretakerDetails = async () => {
       try {
-        const response = await axios.get(`/api/careTaker/${id}`);
-        setCareTaker(response.data);
-        setServiceCharges(response.data.serviceCharges);
-        // Set initial form values from the first service charge
-        if (response.data.serviceCharges.length > 0) {
-          const firstServiceCharge = response.data.serviceCharges[0];
-          setFormValues(prevValues => ({
-            ...prevValues,
-            specialityName: firstServiceCharge.specialityName,
-            totalAmount: firstServiceCharge.amount,
-          }));
-        }
+        const response = await axios.get(`/careTaker/singlecareTaker/${id}`);
+        setServices(response.data.serviceCharges || []);
+        setBusinessName(response.data.businessName || '');
       } catch (error) {
-        console.error('Error fetching care taker:', error.response || error.message);
+        console.error('Error fetching caretaker details:', error.message);
       }
     };
 
-    fetchCareTaker();
+    fetchCaretakerDetails();
   }, [id]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (name === 'startTime' || name === 'endTime') {
-      setFormValues(prevValues => ({
-        ...prevValues,
-        date: { ...prevValues.date, [name]: value },
-      }));
-    } else {
-      setFormValues(prevValues => ({
-        ...prevValues,
-        [name]: type === 'checkbox' ? checked : value,
-      }));
+  const calculateTotalAmount = () => {
+    if (!startTime || !endTime || !specialityName) return;
+
+    try {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+
+      const durationInMinutes = (end - start) / (1000 * 60); // duration in minutes
+      const durationInHours = durationInMinutes / 60; // convert minutes to hours
+
+      if (durationInMinutes <= 0) {
+        throw new Error('Start time cannot be equal to or later than end time.');
+      }
+
+      const serviceCharge = services.find(charge => charge.specialityName === specialityName);
+      if (serviceCharge) {
+        const hourlyRate = serviceCharge.amount / serviceCharge.time;
+        setTotalAmount(hourlyRate * durationInHours);
+        setBookingDurationInHours(parseFloat(durationInHours.toFixed(2))); // limit to two decimal places
+      }
+    } catch (error) {
+      console.error('Error calculating total amount:', error.message);
+      setTotalAmount(0);
+      setBookingDurationInHours(0);
     }
   };
 
-  const handleSpecialityChange = (e) => {
-    const { value } = e.target;
-    const selectedService = serviceCharges.find(service => service.specialityName === value);
-    setFormValues(prevValues => ({
-      ...prevValues,
-      specialityName: value,
-      totalAmount: selectedService ? selectedService.amount : ''
-    }));
+  useEffect(() => {
+    if (startTime && endTime) {
+      calculateTotalAmount();
+    }
+  }, [startTime, endTime, specialityName]);
+
+  const runValidation = () => {
+    const validationErrors = {};
+
+    if (!specialityName) validationErrors.specialityName = 'Please select a service.';
+    if (!startTime) validationErrors.startTime = 'Please select a start time.';
+    if (!endTime) validationErrors.endTime = 'Please select an end time.';
+    if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
+      validationErrors.timeRange = 'End time must be after start time.';
+    }
+    if (isNaN(totalAmount) || totalAmount <= 0) validationErrors.totalAmount = 'Total amount is invalid.';
+    if (isNaN(bookingDurationInHours) || bookingDurationInHours <= 0) validationErrors.bookingDurationInHours = 'Booking duration is invalid.';
+
+    setErrors(validationErrors);
+
+    return Object.keys(validationErrors).length === 0;
   };
 
-  const validateForm = () => {
-    const validationErrors = {};
-    if (!formValues.category) validationErrors.category = 'Category is required';
-    if (!formValues.date.startTime) validationErrors.startTime = 'Start time is required';
-    if (!formValues.date.endTime) validationErrors.endTime = 'End time is required';
-    return validationErrors;
+  const handleServiceNameChange = (e) => {
+    setSpecialityName(e.target.value);
+    runValidation();
+  };
+
+  const handleStartTimeChange = (e) => {
+    setStartTime(e.target.value);
+    runValidation();
+  };
+
+  const handleEndTimeChange = (e) => {
+    setEndTime(e.target.value);
+    runValidation();
+    calculateTotalAmount();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (!runValidation()) return;
+
+    const bookingData = {
+      specialityName,
+      date: {
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+      },
+      totalAmount,
+      bookingDurationInHours,
+    };
+
     try {
-      const response = await axios.post(`/api/booking/create/careTaker/${caretakerId}`, formValues);
-      console.log('Booking successful:', response.data);
-      setFormValues({
-        category: '',
-        date: { startTime: '', endTime: '' },
-        totalAmount: '',
-        accepted: false,
-        specialityName: '',
+      const response = await axios.post(`/booking/careTaker/${id}`, bookingData, {
+        headers: { Authorization: localStorage.getItem('token') },
       });
-      setErrors({});
+      console.log('Booking created:', response.data);
+      toast.success("Booking created successfully.");
+      alert("Please wait until the Care-Taker accepts your booking");
+
+      // Call handleBookingSuccess with the booking ID from response
+      handleBookingSuccess(response.data._id);
     } catch (error) {
-      console.error('Error submitting booking:', error.response || error.message);
+      console.error('Error creating booking:', error.message);
     }
   };
 
+  const handleBookingSuccess = (id) => {
+    navigate(`/create-review/${id}`); // Navigate to the review creation page
+  };
+
   return (
-    <div>
-      <h1>Booking Form</h1>
+    <>
+      <h2>Booking Care-Taker</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="category">Category</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                id="dog"
-                name="category"
-                value="dog"
-                checked={formValues.category === 'dog'}
-                onChange={handleChange}
-              />
-              Dog
-            </label>
-            <label>
-              <input
-                type="radio"
-                id="cat"
-                name="category"
-                value="cat"
-                checked={formValues.category === 'cat'}
-                onChange={handleChange}
-              />
-              Cat
-            </label>
-          </div>
-          {errors.category && <div>{errors.category}</div>}
-        </div>
-        <div>
-          <label htmlFor="startTime">Start Time</label>
-          <input
-            id="startTime"
-            name="startTime"
-            type="datetime-local"
-            value={formValues.date.startTime}
-            onChange={handleChange}
-          />
-          {errors.startTime && <div>{errors.startTime}</div>}
-        </div>
-        <div>
-          <label htmlFor="endTime">End Time</label>
-          <input
-            id="endTime"
-            name="endTime"
-            type="datetime-local"
-            value={formValues.date.endTime}
-            onChange={handleChange}
-          />
-          {errors.endTime && <div>{errors.endTime}</div>}
-        </div>
-        <div>
-          <label htmlFor="specialityName">Speciality Name</label>
-          <select
-            id="specialityName"
-            name="specialityName"
-            value={formValues.specialityName}
-            onChange={handleSpecialityChange}
-          >
+          <label>Service Name:</label>
+          <select value={specialityName} onChange={handleServiceNameChange}>
             <option value="">Select a service</option>
-            {serviceCharges.map((service, index) => (
-              <option key={index} value={service.specialityName}>
+            {services.map((service) => (
+              <option key={service.specialityName} value={service.specialityName}>
                 {service.specialityName}
               </option>
             ))}
           </select>
+          {errors.specialityName && <p className="error">{errors.specialityName}</p>}
         </div>
         <div>
-          <p>Total Amount: {formValues.totalAmount}</p>
+          <label>Start Time:</label>
+          <input
+            type="datetime-local"
+            value={startTime}
+            onChange={handleStartTimeChange}
+          />
+          {errors.startTime && <p className="error">{errors.startTime}</p>}
         </div>
-        <button type="submit">Submit</button>
+        <div>
+          <label>End Time:</label>
+          <input
+            type="datetime-local"
+            value={endTime}
+            onChange={handleEndTimeChange}
+          />
+          {errors.endTime && <p className="error">{errors.endTime}</p>}
+          {errors.timeRange && <p className="error">{errors.timeRange}</p>}
+        </div>
+        <div>
+          <p>Total Amount: ₹ {totalAmount.toFixed(2)}</p>
+          <p>Booking Duration: {bookingDurationInHours.toFixed(2)} hours</p>
+          <p>CareTaker: {businessName}</p>
+        </div>
+        <button type="submit">Book Now</button>
       </form>
-    </div>
+      <ToastContainer />
+    </>
   );
 }
