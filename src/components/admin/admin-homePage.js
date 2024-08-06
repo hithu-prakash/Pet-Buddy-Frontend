@@ -1,71 +1,88 @@
-import React from 'react';
-import { Container, Typography, Box, Button, Grid, Paper } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bgg from '../../photos/bgg.jpg'; // Correct path and extension
+import axios from '../../config/axios';
+import { Container, Box, Typography, Paper, Button } from '@mui/material';
 
 export default function Home() {
     const navigate = useNavigate();
+    const [counts, setCounts] = useState({
+        caretakers: 0,
+        pets: 0,
+        petParents: 0,
+    });
+    const [showCaretakerOptions, setShowCaretakerOptions] = useState(false);
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                const response = await axios.get('/api/admin/counts');
+                setCounts(response.data);
+            } catch (error) {
+                console.error('Error fetching counts:', error);
+            }
+        };
+
+        fetchCounts();
+    }, []);
+
+    const handleCaretakerClick = () => {
+        setShowCaretakerOptions(true);
+    };
 
     return (
-        <Container
-            maxWidth="md"
-            sx={{
-                py: 4,
-                height: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundImage: `url(${bgg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }}
-        >
-            <Paper
-                elevation={3}
-                sx={{
-                    padding: 4,
-                    textAlign: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white background for better readability
-                }}
-            >
-                <Typography variant="h2" component="h1" gutterBottom>
-                    Welcome to PetBuddy
-                </Typography>
-                <Typography variant="h5" color="textSecondary" paragraph>
-                    Your one-stop solution for all your pet care needs. Explore our services, manage your pets, and connect with pet parents.
-                </Typography>
-                <Box mt={4}>
-                    <Grid container spacing={2} justifyContent="center">
-                        <Grid item>
-                            <Button 
-                                variant="contained" 
-                                color="primary" 
-                                onClick={() => navigate('/services')}
-                            >
-                                Explore Services
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button 
-                                variant="outlined" 
-                                color="primary" 
-                                onClick={() => navigate('/pets')}
-                            >
-                                Manage Pets
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button 
-                                variant="outlined" 
-                                color="primary" 
-                                onClick={() => navigate('/register-parents')}
-                            >
-                                Pet Parents
-                            </Button>
-                        </Grid>
-                    </Grid>
+        <Container style={{ padding: '20px', textAlign: 'center' }}>
+            <Typography variant="h2" gutterBottom>
+                Welcome to PetBuddy
+            </Typography>
+            
+            <Box display="flex" justifyContent="center" gap={2}>
+                <Paper
+                    elevation={3}
+                    onClick={handleCaretakerClick}
+                    style={{ padding: '20px', cursor: 'pointer', width: '200px' }}
+                >
+                    <Typography variant="h5">
+                        Caretakers: {counts.caretakers}
+                    </Typography>
+                </Paper>
+                <Paper
+                    elevation={3}
+                    onClick={() => navigate('/parent-all')}
+                    style={{ padding: '20px', cursor: 'pointer', width: '200px' }}
+                >
+                    <Typography variant="h5">
+                        Pet Parents: {counts.petParents}
+                    </Typography>
+                </Paper>
+                <Paper
+                    elevation={3}
+                    onClick={() => navigate('/pet/showAll')}
+                    style={{ padding: '20px', cursor: 'pointer', width: '200px' }}
+                >
+                    <Typography variant="h5">
+                        Pets: {counts.pets}
+                    </Typography>
+                </Paper>
+            </Box>
+            
+            {showCaretakerOptions && (
+                <Box display="flex" justifyContent="center" gap={2} marginTop={2}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => navigate('/caretaker-all')}
+                    >
+                        Verified Caretakers
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => navigate('/careTaker-false')}
+                    >
+                        Unverified Caretakers
+                    </Button>
                 </Box>
-            </Paper>
+            )}
         </Container>
     );
 }

@@ -5,7 +5,7 @@ import { Container, Typography, TextField, Button, Card, CardContent, CircularPr
 import { Rating } from '@mui/material'; // Material UI Rating component
 import { useParams } from 'react-router-dom'
 
-export default function CreateReview() { // Ensure id is passed correctly
+export default function CreateReview() {
   const { id } = useParams();
   const [formData, setFormData] = useState({
     ratings: 0,
@@ -16,7 +16,7 @@ export default function CreateReview() { // Ensure id is passed correctly
   const dispatch = useDispatch();
   const reviewState = useSelector((state) => state.review);
 
- const handleChange = (e) => {
+  const handleChange = (e) => {
     if (e.target.name === 'photos') {
       const file = e.target.files[0];
       setFormData({ ...formData, photos: file });
@@ -44,8 +44,6 @@ export default function CreateReview() { // Ensure id is passed correctly
       console.error('Booking ID is undefined');
     }
   };
-// console.log(handleSubmit)
-  
 
   return (
     <Container>

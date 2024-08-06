@@ -40,7 +40,7 @@ export default function PetParentId() {
                         Authorization: `${localStorage.getItem('token')}`,
                     },
                 });
-                toast.success('PetParent deleted successfully');
+                toast.success('Pet Parent deleted successfully');
                 setTimeout(() => navigate('/parent-all'), 2000); // Redirect after showing the toast
             } catch (error) {
                 console.error('Error deleting pet parent:', error);
@@ -58,10 +58,10 @@ export default function PetParentId() {
                 <Card>
                     <CardMedia
                         component="img"
-                        height="150" // Set to medium size
+                        height="150"
                         image={petParent.parentPhoto || 'default-image-url'}
                         alt="Parent Photo"
-                        sx={{ width: 'auto', marginBottom: 2 }} // Adjust width and margin
+                        sx={{ width: 'auto', marginBottom: 2 }}
                     />
                     <CardContent>
                         <Typography variant="h5" gutterBottom>
@@ -81,10 +81,10 @@ export default function PetParentId() {
                         </Typography>
                         <CardMedia
                             component="img"
-                            height="150" // Set to medium size
+                            height="150"
                             image={petParent.proof || 'default-image-url'}
                             alt="Proof Photo"
-                            sx={{ width: 'auto' }} // Adjust width
+                            sx={{ width: 'auto' }}
                         />
                         <Button
                             variant="contained"
@@ -93,6 +93,14 @@ export default function PetParentId() {
                             sx={{ marginTop: 2 }}
                         >
                             Delete
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate(`/pets/by-parent/${id}`)}
+                            sx={{ marginTop: 2, marginLeft: 1 }}
+                        >
+                            Show Pet Details
                         </Button>
                     </CardContent>
                 </Card>

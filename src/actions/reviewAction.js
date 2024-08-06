@@ -42,7 +42,7 @@ export const fetchReviewsFailure = (error) => ({
 export const createReview = (bookingId, reviewData) => {
   return (dispatch) => {
     dispatch(createReviewRequest());
-    axios.post(`/review/create/booking/${bookingId}`, reviewData, {
+    axios.post(`/review/${bookingId}`, reviewData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `${localStorage.getItem('token')}`, // Ensure token is retrieved correctly

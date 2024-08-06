@@ -6,12 +6,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import Spinner from '../../utility/spinner';
 
 export default function CareTakerAccount() {
-    const {id} = useParams(); // Get the params object
-     // Extract id from params
-    console.log(id)
+    const { id } = useParams(); // Get the params object
     const [careTaker, setCareTaker] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState({}); // Initialize as an empty object
+    const [userRole, setUserRole] = useState(null); // State to hold user role
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,12 +21,11 @@ export default function CareTakerAccount() {
                 return;
             }
             try {
-                const response = await axios.get(`/careTaker/singlecareTaker/${id}`, { // Use id here
+                const response = await axios.get(`/careTaker/singlecareTaker/${id}`, {
                     headers: {
                         Authorization: `${localStorage.getItem('token')}`, // Ensure token format is correct
                     },
                 });
-                console.log(response.data)
                 setCareTaker(response.data);
                 setLoading(false);
             } catch (err) {
@@ -36,6 +34,14 @@ export default function CareTakerAccount() {
                 setLoading(false);
             }
         };
+
+        // Decode the token to get the user role
+        const token = localStorage.getItem('token');
+        if (token) {
+            const base64Payload = token.split('.')[1];
+            const decodedPayload = JSON.parse(atob(base64Payload));
+            setUserRole(decodedPayload.role);  // Assuming role is stored in the token
+        }
 
         fetchCareTaker();
     }, [id]); // Add id as a dependency to useEffect
@@ -105,17 +111,22 @@ export default function CareTakerAccount() {
                         <h3>Proof Document</h3>
                         <img src={careTaker.proof} alt='Proof Document' style={{ maxWidth: '200px' }} />
                     </div>
-                    <button onClick={() => navigate(`/update-caretaker/${careTaker._id}`)}>Update your Profile</button>
-                    <button onClick={handleDelete}>Delete your Profile</button>
+                    {careTaker.userId && (userRole === 'petParent' || userRole === 'admin') ? (
+                        <>
+                            <button onClick={() => navigate(`/update-caretaker/${careTaker._id}`)}>Update your Profile</button>
+                            <button onClick={handleDelete}>Delete your Profile</button>
+                            <button onClick={() => navigate(`/create-booking/${careTaker._id}`)}>Book CareTaker</button>
+                        </>
+                    ) : (
+                        <button onClick={() => navigate(`/create-booking/${careTaker._id}`)}>Book CareTaker</button>
+                    )}
                 </div>
             ) : (
                 <div>
                     <p>No CareTaker profile found.</p>
                     <button onClick={() => navigate(`/create-caretaker`)}>Create Care-Taker Profile</button>
                 </div>
-                
             )}
-            <button onClick={() => navigate(`/create-booking/${careTaker._id}`)}>Book CareTaker</button>
             <ToastContainer />
         </div>
     );

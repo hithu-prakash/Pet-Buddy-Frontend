@@ -1,96 +1,211 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../../config/axios'; // Adjust based on your axios setup
-import { Container, Typography, Grid, Card, CardContent, CardMedia, CircularProgress, Alert, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import axios from '../../config/axios';
+import { Link } from 'react-router-dom';
+import StarRating from '../review/starRating'; // Adjust import path as necessary
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  CircularProgress,
+  Alert,
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  Box,
+  DialogContent
+} from '@mui/material';
 
-const CaretakerList = () => {
-  const [caretakers, setCaretakers] = useState([]);
+const CareTakerAll = () => {
+  const [careTakers, setCareTakers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Hook to handle navigation
+  const [errors, setErrors] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedCaretaker, setSelectedCaretaker] = useState(null);
+  const [bookingDetails, setBookingDetails] = useState(null);
+  
+  // Retrieve role from local storage
+  const userRole = localStorage.getItem('role');
 
   useEffect(() => {
-    const fetchCaretakers = async () => {
+    const fetchCareTakers = async () => {
       try {
-        const response = await axios.get('/api/admin/caretakers');
-        setCaretakers(response.data);
-      } catch (err) {
-        setError('Something went wrong while fetching caretakers.');
-        console.error(err);
-      } finally {
+        const response = await axios.get('/caretaker/showallverifiedcareTaker', {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+          },
+        });
+        setCareTakers(response.data);
+        setLoading(false);
+      } catch (error) {
+        setErrors(error);
         setLoading(false);
       }
     };
-
-    fetchCaretakers();
+    fetchCareTakers();
   }, []);
 
-  const handleVerifyCaretaker = (id) => {
-    navigate(`/caretaker-single/${id}`); // Navigate to the caretaker detail page
+  const fetchBookingDetails = async (caretakerId) => {
+    try {
+      const response = await axios.get(`/CTdetails/${caretakerId}`, {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+      });
+      setBookingDetails(response.data);
+    } catch (error) {
+      setErrors(error);
+    }
   };
 
-  if (loading) {
-    return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
+  const handleOpenDialog = (caretaker) => {
+    setSelectedCaretaker(caretaker);
+    fetchBookingDetails(caretaker._id);
+    setOpenDialog(true);
+  };
 
-  if (error) {
-    return (
-      <Container sx={{ marginTop: 2 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
-  }
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setBookingDetails(null);
+  };
+
+  if (loading) return (
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </Container>
+  );
+
+  if (errors) return (
+    <Container sx={{ marginTop: 2 }}>
+      <Alert severity="error">{errors.message}</Alert>
+    </Container>
+  );
 
   return (
     <Container sx={{ marginTop: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Unverified Caretakers
+        Verified Caretakers List
       </Typography>
       <Grid container spacing={3}>
-        {caretakers.map(caretaker => (
-          <Grid item xs={12} sm={6} md={4} key={caretaker._id}>
-            <Card>
+        {careTakers.map((ele) => (
+          <Grid item xs={12} sm={6} md={4} key={ele._id}>
+            <Card sx={{ maxWidth: 345 }}>
               <CardMedia
                 component="img"
                 height="140"
-                image={caretaker.photo || 'default-image-url'}
-                alt={caretaker.businessName}
+                image={ele.photo || 'default-image-url'}
+                alt="Profile"
               />
               <CardContent>
+                {ele.userId ? (
+                  <>
+                    <Typography variant="h6" gutterBottom>
+                      {ele.userId.username}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Email: {ele.userId.email}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Phone: {ele.userId.phoneNumber}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    User Information not available
+                  </Typography>
+                )}
+                <Typography variant="body1" gutterBottom>
+                  Business Name: {ele.businessName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Address: {ele.address}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Bio: {ele.bio}
+                </Typography>
                 <Typography variant="h6" gutterBottom>
-                  {caretaker.businessName}
+                  Services:
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Address: {caretaker.address}
+                {ele.serviceCharges.map((charge, index) => (
+                  <Typography key={index} variant="body2" color="text.secondary">
+                    <div>Service Name: {charge.specialityName}</div>
+                    <div>Service Amount: {charge.amount}</div>
+                    <div>Service Time: {charge.time}</div>
+                  </Typography>
+                ))}
+                <Typography variant="h6" gutterBottom>
+                  Profile Photo
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Bio: {caretaker.bio}
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={ele.photo}
+                  alt="Profile"
+                />
+                <Typography variant="h6" gutterBottom>
+                  Proof Document
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {caretaker.serviceCharges.map((charge, index) => (
-                    <div key={index}>
-                      Speciality: {charge.specialityName}, Amount: {charge.amount}, Time: {charge.time}
-                    </div>
-                  ))}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleVerifyCaretaker(caretaker._id)}
-                >
-                  Verify
-                </Button>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={ele.proof}
+                  alt="Proof"
+                />
+                {ele.userId && ele.userId._id && userRole !== 'admin' && (
+                  <>
+                    <Button
+                      component={Link}
+                      to={`/caretaker-account/${ele._id}`}
+                      variant="contained"
+                      color="primary"
+                      sx={{ marginTop: 2 }}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleOpenDialog(ele)}
+                      sx={{ marginTop: 2, marginLeft: 1 }}
+                    >
+                      Total Bookings
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Booking Details</DialogTitle>
+        <DialogContent>
+          {bookingDetails ? (
+            <Box>
+              <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                Average Rating:
+                <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 1 }}>
+                  <StarRating
+                    rating={bookingDetails.averageRating}
+                    onChange={() => {}}
+                    editable={false} // Pass editable=false to make it read-only
+                  />
+                </Box>
+              </Typography>
+              <Typography variant="h6">
+                Total Bookings: {bookingDetails.bookingsCount}
+              </Typography>
+            </Box>
+          ) : (
+            <CircularProgress />
+          )}
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };
 
-export default CaretakerList;
+export default CareTakerAll;

@@ -1,231 +1,219 @@
-// import React, { useEffect, useState } from 'react';
-// import axios from '../../config/axios';
-// import { Link ,useParams} from 'react-router-dom';
-
-// export default function CareTakerAll() {
-//     //const {id}=useParams()
-//   const [careTakers, setCareTakers] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [errors, setErrors] = useState(null);
-
-//   useEffect(() => {
-//     const fetchCareTakers = async () => {
-//       try {
-//         const response = await axios.get('/caretaker/showallverifiedcareTaker', {
-//           headers: {
-//             Authorization: localStorage.getItem('token'),
-//           },
-//         });
-//         console.log(response.data);
-//         setCareTakers(response.data);
-//         setLoading(false);
-//       } catch (error) {
-//         console.log(error.message);
-//         setErrors(error);
-//         setLoading(false);
-//       }
-//     };
-//     fetchCareTakers();
-//   }, []);
-
-//   if (loading) return <div>Loading...</div>;
-//   if (errors) return <div>{errors.message}</div>;
-
-//   return (
-//     <div>
-//       <h2>Verified Caretakers List</h2>
-//       {careTakers.map((ele) => (
-//         <div key={ele._id} className="care-taker-card">
-//           {ele.userId ? (
-//             <>
-//               <h2>{ele.userId.username}</h2>
-//               <p>Email: {ele.userId.email}</p>
-//               <p>Phone: {ele.userId.phoneNumber}</p>
-//             </>
-//           ) : (
-//             <p>User Information not available</p>
-//           )}
-//           <p>Business Name: {ele.businessName}</p>
-//           <p>Address: {ele.address}</p>
-//           <p>Bio: {ele.bio}</p>
-//           <div>
-//             <h3>Services:</h3>
-//             {ele.serviceCharges.map((charge, index) => (
-//               <div key={index}>
-//                 <p>Service Name: {charge.name}</p>
-//                 <p>Service Amount: {charge.amount}</p>
-//                 <p>Service Time: {charge.time}</p>
-//               </div>
-//             ))}
-//           </div>
-//           <div>
-//             <h3>Profile Photo</h3>
-//             <img src={ele.photo} alt="Profile" style={{ maxWidth: '200px' }} />
-//           </div>
-//           <div>
-//             <h3>Proof Document</h3>
-//             <img src={ele.proof} alt="Proof" style={{ maxWidth: '200px' }} />
-//           </div>
-//           {ele.userId && ele.userId._id && (
-//             <Link to={`/caretaker-account/${ele._id}`}>View Details</Link>
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../../config/axios';
-import { Container, Typography, Paper, Button, Avatar, List, ListItem, ListItemText, ListItemAvatar, Divider, Grid, IconButton, Pagination, PaginationItem } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CloseIcon from '@mui/icons-material/Close';
+import { Link } from 'react-router-dom';
+import StarRating from '../review/starRating'; // Adjust import path as necessary
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  CircularProgress,
+  Alert,
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  Box,
+  DialogContent
+} from '@mui/material';
+import VerifiedIcon from '@mui/icons-material/Verified'; // Import a verification icon
 
+const CareTakerAll = () => {
+  const [careTakers, setCareTakers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedCaretaker, setSelectedCaretaker] = useState(null);
+  const [bookingDetails, setBookingDetails] = useState(null);
 
-export default function AllBookingCareTaker(){ 
-  const [bookings, setBookings] = useState([]);
-  const [error, setError] = useState(null);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [view, setView] = useState('');
-  const [page, setPage] = useState(1);
-  const bookingsPerPage = 5;
+  // Retrieve role from local storage
+  const userRole = localStorage.getItem('role');
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchCareTakers = async () => {
       try {
-        const response = await axios.get('/booking/allcaretaker-booking', {
-            headers: { Authorization: localStorage.getItem('token') },
-          });
-        setBookings(response.data);
+        const response = await axios.get('/caretaker/showallverifiedcareTaker', {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+          },
+        });
+        setCareTakers(response.data);
+        setLoading(false);
       } catch (error) {
-        console.log(error)
-        setError('Error fetching bookings.');
+        setErrors(error);
+        setLoading(false);
       }
     };
-    fetchBookings();
+    fetchCareTakers();
   }, []);
 
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (!bookings.length) return <Typography>Loading...</Typography>;
-
-  const toggleView = (viewName) => {
-    setView(prevView => (prevView === viewName ? '' : viewName));
-  };
-
-  const handleViewDetails = (booking) => {
-    setSelectedBooking(booking);
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedBooking(null);
-  };
-
-  const handleChangePage = (event, value) => {
-    setPage(value);
-  };
-
-  const handleAcceptBooking = async () => {
+  const fetchBookingDetails = async (caretakerId) => {
     try {
-      await axios.put(`/booking/accept-caretaker/${selectedBooking._id}`, {}, {
-        headers: { Authorization: localStorage.getItem('token') },
+      const response = await axios.get(`/CTdetails/${caretakerId}`, {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
       });
-      setBookings(bookings.map(booking => booking._id === selectedBooking._id ? { ...booking, status: 'confirmed', Accepted: true } : booking));
-      setSelectedBooking(null);
+      setBookingDetails(response.data);
     } catch (error) {
-      console.error('Error accepting booking:', error);
+      setErrors(error);
     }
   };
 
-  const handleRejectBooking = async () => {
-    try {
-      await axios.put(`/booking/deny-caretaker/${selectedBooking._id}`, {}, {
-        headers: { Authorization: localStorage.getItem('token') },
-      });
-      setBookings(bookings.map(booking => booking._id === selectedBooking._id ? { ...booking, status: 'cancelled', Accepted: false } : booking));
-      setSelectedBooking(null);
-    } catch (error) {
-      console.error('Error rejecting booking:', error);
-    }
+  const handleOpenDialog = (caretaker) => {
+    setSelectedCaretaker(caretaker);
+    fetchBookingDetails(caretaker._id);
+    setOpenDialog(true);
   };
 
-  const displayedBookings = bookings.slice((page - 1) * bookingsPerPage, page * bookingsPerPage);
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setBookingDetails(null);
+  };
+
+  if (loading) return (
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </Container>
+  );
+
+  if (errors) return (
+    <Container sx={{ marginTop: 2 }}>
+      <Alert severity="error">{errors.message}</Alert>
+    </Container>
+  );
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>All Bookings</Typography>
+    <Container sx={{ marginTop: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Verified Caretakers List
+      </Typography>
       <Grid container spacing={3}>
-      <Grid item xs={6}>
-      {displayedBookings.map((booking) => (
-        <Paper key={booking._id} style={{ padding: 20, marginBottom: 20 }}>
-          <Typography variant="h6" gutterBottom>Booking for {booking.petId.petName} By {booking.userId.username}</Typography>
-          <Typography variant="body1"><strong>Service Name:</strong> {booking.specialityName}</Typography>
-          <Typography variant="body1"><strong>Total Amount:</strong> ₹{booking.totalAmount.toFixed(2)}</Typography>
-          <Typography variant="body1"><strong>Booking Duration:</strong> {booking.bookingDurationInHours.toFixed(2)} hours</Typography>
-          <Typography variant="body1"><strong>Status:</strong> {booking.status}</Typography>
-          <Button variant="contained" color="primary" onClick={() => handleViewDetails(booking)} style={{ marginRight: 10 }}>View Details</Button>
-        </Paper>
-      ))}
-      <Pagination
-        count={Math.ceil(bookings.length / bookingsPerPage)}
-        page={page}
-        onChange={handleChangePage}
-        renderItem={(item) => (
-          <PaginationItem
-            slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
-            {...item}
-          />
-        )}
-      />
+        {careTakers.map((ele) => (
+          <Grid item xs={12} sm={6} md={4} key={ele._id}>
+            <Card sx={{ maxWidth: 345 }}>
+              <CardMedia
+                component="img"
+                height="140"
+                image={ele.photo || 'default-image-url'}
+                alt="Profile"
+              />
+              <CardContent>
+                {ele.userId ? (
+                  <>
+                    <Typography variant="h6" gutterBottom>
+                      {ele.userId.username}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Email: {ele.userId.email}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Phone: {ele.userId.phoneNumber}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    User Information not available
+                  </Typography>
+                )}
+                <Typography variant="body1" gutterBottom>
+                  Business Name: {ele.businessName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Address: {ele.address}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Bio: {ele.bio}
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  Services:
+                </Typography>
+                {ele.serviceCharges.map((charge, index) => (
+                  <Typography key={index} variant="body2" color="text.secondary">
+                    <div>Service Name: {charge.specialityName}</div>
+                    <div>Service Amount: {charge.amount}</div>
+                    <div>Service Time: {charge.time}</div>
+                  </Typography>
+                ))}
+                <Typography variant="h6" gutterBottom>
+                  Profile Photo
+                </Typography>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={ele.photo}
+                  alt="Profile"
+                />
+                <Typography variant="h6" gutterBottom>
+                  Proof Document
+                </Typography>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={ele.proof}
+                  alt="Proof"
+                />
+                {ele.isVerified && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
+                    <VerifiedIcon sx={{ color: 'blue', marginRight: 1 }} />
+                    <Typography variant="body2" color="text.primary">Verified</Typography>
+                  </Box>
+                )}
+                {ele.userId && ele.userId._id && userRole !== 'admin' && (
+                  <>
+                    <Button
+                      component={Link}
+                      to={`/caretaker-account/${ele._id}`}
+                      variant="contained"
+                      color="primary"
+                      sx={{ marginTop: 2 }}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleOpenDialog(ele)}
+                      sx={{ marginTop: 2, marginLeft: 1 }}
+                    >
+                      Total Bookings
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
-      <Grid item xs={6}>
-      {selectedBooking && (
-        <div>
-          <Paper style={{ padding: 20, marginTop: 20, position: 'relative' }}>
-            <IconButton
-              onClick={handleCloseDetails}
-              style={{ position: 'absolute', top: 10, right: 10 }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Typography variant="h6" gutterBottom>Service Details</Typography>
-            <Typography variant="body1"><strong>Service Name:</strong> {selectedBooking.specialityName}</Typography>
-            <Typography variant="body1"><strong>Start Time:</strong> {new Date(selectedBooking.date.startTime).toLocaleString()}</Typography>
-            <Typography variant="body1"><strong>End Time:</strong> {new Date(selectedBooking.date.endTime).toLocaleString()}</Typography>
-            <Typography variant="body1"><strong>Total Amount:</strong> ₹{selectedBooking.totalAmount.toFixed(2)}</Typography>
-            <Typography variant="body1"><strong>Booking Duration:</strong> {selectedBooking.bookingDurationInHours.toFixed(2)} hours</Typography>
-            <Typography variant="body1"><strong>Status:</strong> {selectedBooking.status}</Typography>
-            <Button variant="contained" color="success" onClick={handleAcceptBooking} style={{ marginTop: 10 }}>Accept Booking</Button>
-            <Button variant="contained" color="error" onClick={handleRejectBooking} style={{ marginTop: 10, marginLeft: 10 }}>Reject Booking</Button>
-            <Divider style={{ margin: '20px 0' }} />
-            <Button variant="contained" color="secondary" onClick={() => toggleView('petDetails')} style={{ marginRight: 10 }}>View Pet Details</Button>
-            <Button variant="contained" color="secondary" onClick={() => toggleView('petParentDetails')}>View Pet Parent Details</Button>
-            {view === 'petDetails' && (
-              <Paper style={{ padding: 20, marginTop: 20 }}>
-                <Typography variant="h6" gutterBottom>Pet Details</Typography>
-                <Typography variant="body1"><strong>Pet Name:</strong> {selectedBooking.petId.petName}</Typography>
-                <Typography variant="body1"><strong>Age:</strong> {selectedBooking.petId.age}</Typography>
-                <Typography variant="body1"><strong>Gender:</strong> {selectedBooking.petId.gender}</Typography>
-                <Typography variant="body1"><strong>Category:</strong> {selectedBooking.petId.category}</Typography>
-                <Typography variant="body1"><strong>Breed:</strong> {selectedBooking.petId.breed}</Typography>
-                <Typography variant="body1"><strong>Weight:</strong> {selectedBooking.petId.weight}</Typography>
-                <Avatar src={selectedBooking.petId.petPhoto} alt="Pet" style={{ width: 100, height: 100 }} />
-              </Paper>
-            )}
-            {view === 'petParentDetails' && (
-              <Paper style={{ padding: 20, marginTop: 20 }}>
-                <Typography variant="h6" gutterBottom>Pet Parent Details</Typography>
-                <Typography variant="body1"><strong>User Name:</strong> {selectedBooking.userId.username}</Typography>
-                <Typography variant="body1"><strong>User Email:</strong> {selectedBooking.userId.email}</Typography>
-                <Typography variant="body1"><strong>Address:</strong> {selectedBooking.petparentId.address}</Typography>
-                <Avatar src={selectedBooking.petparentId.photo} alt="Pet Parent" style={{ width: 100, height: 100 }} />
-              </Paper>
-            )}
-          </Paper>
-        </div>
-      )}
-      </Grid>
-      </Grid>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Booking Details</DialogTitle>
+        <DialogContent>
+          {bookingDetails ? (
+            <Box>
+              <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                Average Rating:
+                <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 1 }}>
+                  <StarRating
+                    rating={bookingDetails.averageRating}
+                    onChange={() => {}}
+                    editable={false} // Pass editable=false to make it read-only
+                  />
+                </Box>
+              </Typography>
+              <Typography variant="h6">Average Ratings: {bookingDetails.averageRating.toFixed(1)}</Typography>
+              <Typography variant="h6">
+                Total Bookings: {bookingDetails.bookingsCount}
+              </Typography>
+            </Box>
+          ) : (
+            <CircularProgress />
+          )}
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };
+
+export default CareTakerAll;
