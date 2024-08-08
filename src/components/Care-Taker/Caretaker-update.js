@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../../config/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Spinner from '../../utility/spinner'; // Add this if you have a Spinner component
 
-export default function CreateCareForm() {
+const predefinedServices = [
+    'Pet-Boarding',
+    'Pet-Sitting',
+    'Pet-Walking',
+    'Pet-Grooming',
+    'Pet-Taxi',
+    'Pet-Training',
+    'Vet-Consult',
+    'Others...',
+]
+export default function CareTakerUpdate() {
+    const { id } = useParams();
+    // console.log(id)
     const navigate = useNavigate();
     const [form, setForm] = useState({
         businessName: '',
@@ -16,8 +29,39 @@ export default function CreateCareForm() {
         serverErrors: null,
         clientErrors: {}
     });
-
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCareTaker = async () => {
+            try {
+                const response = await axios.get(`/careTaker/singlecareTaker`, {
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    },
+                });
+                console.log(response.data)
+                const careTaker = response.data;
+                setForm({
+                    businessName: careTaker.businessName,
+                    address: careTaker.address,
+                    bio: careTaker.bio,
+                   serviceCharges: careTaker.serviceCharges || [{ specialityName: '', amount: '', time: '' }],
+                    photo: null, // You may need to handle URL or file upload differently
+                    proof: null, // Same as above
+                    serverErrors: null,
+                    clientErrors: {}
+                });
+                setLoading(false);
+            } catch (error) {
+                console.error(error.message);
+                setErrors({ fetch: 'Something went wrong' });
+                setLoading(false);
+            }
+        };
+
+        fetchCareTaker();
+    }, [id]);
 
     const runValidation = () => {
         const tempErrors = {};
@@ -30,17 +74,21 @@ export default function CreateCareForm() {
         if (form.bio.trim().length === 0) {
             tempErrors.bio = 'Bio is required';
         }
-        if (!form.photo) {
-            tempErrors.photo = 'Profile Photo is required';
-        }
-        if (!form.proof) {
-            tempErrors.proof = 'Government Proof is required';
-        }
-        // if (!form.serviceCharges.every(charge => charge.specialityName.trim().length > 0)) {
-        //     tempErrors.serviceCharges = 'All service charges must have a speciality name';
-        // }
+        form.serviceCharges.forEach((charge, index) => {
+            if (!charge.name || charge.name.trim().length === 0) {
+                tempErrors[`serviceCharges[${index}].name`] = 'Service name is required';
+            }
+            if (!charge.amount || String(charge.amount).trim().length === 0) {
+                tempErrors[`serviceCharges[${index}].amount`] = 'Service amount is required';
+            }
+            if (!charge.time || charge.time.trim().length === 0) {
+                tempErrors[`serviceCharges[${index}].time`] = 'Service time is required';
+            }
+        });
         setErrors(tempErrors);
     };
+    
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -50,8 +98,7 @@ export default function CreateCareForm() {
     const handleServiceChargeChange = (index, e) => {
         const { name, value } = e.target;
         const updatedServiceCharges = form.serviceCharges.map((charge, i) =>
-            i === index ? { ...charge, [name]: value } : charge
-        );
+            i === index ? { ...charge, [name]: value } : charge);
         setForm(prevForm => ({ ...prevForm, serviceCharges: updatedServiceCharges }));
     };
 
@@ -76,6 +123,7 @@ export default function CreateCareForm() {
         e.preventDefault();
         runValidation();
         if (Object.keys(errors).length === 0) {
+            setLoading(true);
             try {
                 const formData = new FormData();
                 formData.append('businessName', form.businessName);
@@ -84,37 +132,28 @@ export default function CreateCareForm() {
                 if (form.photo) formData.append('photo', form.photo);
                 if (form.proof) formData.append('proof', form.proof);
                 formData.append('serviceCharges', JSON.stringify(form.serviceCharges));
-            
-                // Log FormData content for debugging
-                for (let [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
-        
-                const token = localStorage.getItem('token');
-                const response = await axios.post('/caretaker/create', formData, {
+
+                // const token = localStorage.getItem('token');
+                const response = await axios.put(`/careTaker/update/${id}`, formData, {
                     headers: {
-                        'Authorization': `${token}`,
+                        'Authorization': localStorage.getItem('token'),
                         'Content-Type': 'multipart/form-data',
                     }
                 });
-                console.log(response.data);
-                const id=response.data._id
-                console.log(id)
-                toast.success('CareTaker created successfully!');
-                navigate(`/singleOneCareTaker`);
-        
+                console.log(response);
+                setLoading(false);
+                toast.success("Profile Updated successfully.");
+                alert("Profile Updated successfully.");
+                navigate('/single-caretaker'); // Redirect to a different page
+
             } catch (err) {
-                console.error('Submit Error:', err);
-                const serverErrors = err.response?.data?.errors || 'An unexpected error occurred';
+                const serverErrors = err.response && err.response.data ? err.response.data.errors : 'An unexpected error occurred';
                 setForm(prevForm => ({ ...prevForm, serverErrors }));
             }
         } else {
             setForm(prevForm => ({ ...prevForm, clientErrors: errors }));
         }
     };
-    
-    
-    
 
     const displayErrors = () => {
         if (form.serverErrors) {
@@ -136,11 +175,15 @@ export default function CreateCareForm() {
         return null;
     };
 
+    // if (loading) return <Spinner />; // Show spinner if loading
+    if (errors.fetch) return <div>{errors.fetch}</div>;
+
     return (
         <div>
-            <h2>New CareTaker Form</h2>
+            {loading && <Spinner />}
+            <h2>Update CareTaker Form</h2>
             <form onSubmit={handleSubmit}>
-                <label htmlFor='businessName'>Business Name</label><br />
+                <label htmlFor='businessName'> Business Name</label><br />
                 <input type='text' value={form.businessName} onChange={handleChange} name='businessName' id='businessName' /><br />
                 {errors.businessName && <span>{errors.businessName}</span>}<br />
 
@@ -155,24 +198,39 @@ export default function CreateCareForm() {
                 <label htmlFor='serviceCharges'>Enter Service Charges</label><br />
                 {form.serviceCharges.map((charge, index) => (
                     <div key={index}>
-                         <select
-                            name='specialityName'
-                            value={charge.specialityName}
+                        <select
+                            value={charge.name}
                             onChange={(e) => handleServiceChargeChange(index, e)}
+                            name='name'
                         >
                             <option value=''>Select Service</option>
-                            <option value='Pet-Boarding'>Pet-Boarding</option>
-                            <option value='Pet-Sitting'>Pet-Sitting</option>
-                            <option value='Pet-Walking'>Pet-Walking</option>
-                            <option value='Pet-Grooming'>Pet-Grooming</option>
-                            <option value='Pet-Taxi'>Pet-Taxi</option>
-                            <option value='Pet-Training'>Pet-Training</option>
-                            <option value='Vet-Consult'>Vet-Consult</option>
-                            <option value='Others'>Others...</option>
-                        </select> <br/>
-                        {/* <input type='text' value={charge.specialityName} onChange={(e) => handleServiceChargeChange(index, e)} name='specialityName' placeholder='Service Name' /><br /> */}
-                        <input type='text' value={charge.amount} onChange={(e) => handleServiceChargeChange(index, e)} name='amount' placeholder='Amount' /><br />
-                        <input type='text' value={charge.time} onChange={(e) => handleServiceChargeChange(index, e)} name='time' placeholder='Time (hours)'  min='1' step='0.5' /><br />
+                            {predefinedServices.map((service, i) => (
+                                <option key={i} value={service}>{service}</option>
+                            ))}
+                        </select><br />
+                        {charge.name === 'Other' && (
+                            <input
+                                type='text'
+                                value={charge.customName || ''}
+                                onChange={(e) => handleServiceChargeChange(index, e)}
+                                name='customName'
+                                placeholder='Enter custom service name'
+                            />
+                        )}
+                        <input
+                            type='text'
+                            value={charge.amount}
+                            onChange={(e) => handleServiceChargeChange(index, e)}
+                            name='amount'
+                            placeholder='Amount'
+                        /><br />
+                        <input
+                            type='text'
+                            value={charge.time}
+                            onChange={(e) => handleServiceChargeChange(index, e)}
+                            name='time'
+                            placeholder='Time'
+                        /><br />
                         {index > 0 && <button type='button' onClick={() => handleRemoveServiceCharge(index)}>Remove</button>}
                     </div>
                 ))}
@@ -185,10 +243,12 @@ export default function CreateCareForm() {
                 <label htmlFor='proof'>Provide Government Proof (Aadhaar)</label><br />
                 <input type='file' onChange={handleFileChange} name='proof' id='proof' /><br />
                 {errors.proof && <span>{errors.proof}</span>}<br />
-                <input type="submit" />
+
+                <button type='submit'>Update CareTaker</button>
             </form>
+
             {form.serverErrors && displayErrors()}
             <ToastContainer />
         </div>
     );
-}
+};

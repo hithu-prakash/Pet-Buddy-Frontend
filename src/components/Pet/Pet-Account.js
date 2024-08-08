@@ -1,54 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Spinner from '../../utility/spinner';
 
 export default function PetAccount() {
+  const { id } = useParams(); // Get pet ID from URL parameters
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState({}); // Initialize with an empty object
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPet = async () => {
       try {
-        const response = await axios.get(`/pet/singlePet`, {
+        const response = await axios.get(`/pet/singlePet/${id}`, {
           headers: {
-            Authorization: localStorage.getItem('token'),
+            Authorization: ` ${localStorage.getItem('token')}`,
           },
         });
         setPet(response.data);
         setLoading(false);
       } catch (err) {
-        setError({ fetch: 'Something went wrong' });
+        console.error(err); // Log full error for debugging
+        setError('Something went wrong. Please try again.');
         setLoading(false);
       }
     };
-    fetchPet();
-  }, []);
+    if (id) {
+      fetchPet();
+    }
+  }, [id]);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this pet?")) {
       try {
         await axios.delete(`/pet/delete/${pet._id}`, {
           headers: {
-            Authorization: localStorage.getItem('token'),
+            Authorization: `${localStorage.getItem('token')}`,
           },
         });
         toast.success("Pet deleted successfully.");
-        navigate('/pets'); // Redirect after successful deletion
+        navigate('/pets');
       } catch (err) {
         toast.error("Failed to delete pet. Please try again.");
+        console.error(err); // Log full error for debugging
       }
     }
   };
 
-  if (error.fetch) return <div>{error.fetch}</div>;
+  if (loading) return <Spinner />;
+  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+
   return (
     <div>
-      {loading && <Spinner />}
       <h2>Pet Details</h2>
       {pet ? (
         <div className='pet-card'>
@@ -98,7 +104,6 @@ export default function PetAccount() {
       ) : (
         <div>No Pet profile found.</div>
       )}
-        {error && <div style={{ color: 'red' }}>{error.fetch}</div>}
       <ToastContainer />
     </div>
   );

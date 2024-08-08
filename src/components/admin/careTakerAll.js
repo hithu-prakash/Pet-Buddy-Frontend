@@ -15,7 +15,8 @@ import {
   Dialog,
   DialogTitle,
   Box,
-  DialogContent
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 
 const CareTakerAll = () => {
@@ -25,14 +26,16 @@ const CareTakerAll = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCaretaker, setSelectedCaretaker] = useState(null);
   const [bookingDetails, setBookingDetails] = useState(null);
-  
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [caretakerToVerify, setCaretakerToVerify] = useState(null);
+
   // Retrieve role from local storage
   const userRole = localStorage.getItem('role');
 
   useEffect(() => {
     const fetchCareTakers = async () => {
       try {
-        const response = await axios.get('/caretaker/showallverifiedcareTaker', {
+        const response = await axios.get('/api/admin/caretakers', {
           headers: {
             Authorization: localStorage.getItem('token'),
           },
@@ -71,44 +74,78 @@ const CareTakerAll = () => {
     setBookingDetails(null);
   };
 
-  if (loading) return (
-    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <CircularProgress />
-    </Container>
-  );
+  const handleVerifyCaretaker = async (caretakerId) => {
+    setCaretakerToVerify(caretakerId);
+    setConfirmOpen(true);
+  };
 
-  if (errors) return (
-    <Container sx={{ marginTop: 2 }}>
-      <Alert severity="error">{errors.message}</Alert>
-    </Container>
-  );
+  const handleConfirmVerify = async () => {
+    try {
+      await axios.put(`/api/admin/verify-caretaker/${caretakerToVerify}`, {}, {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+      });
+      // Refetch caretaker list
+      const response = await axios.get('/api/admin/caretakers', {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+      });
+      setCareTakers(response.data);
+      setConfirmOpen(false);
+    } catch (error) {
+      setErrors(error);
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+    setCaretakerToVerify(null);
+  };
+
+  if (loading) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (errors) {
+    return (
+      <Container sx={{ marginTop: 2 }}>
+        <Alert severity="error">{errors.message}</Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container sx={{ marginTop: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Verified Caretakers List
+        UnVerified Caretakers List
       </Typography>
       <Grid container spacing={3}>
-        {careTakers.map((ele) => (
-          <Grid item xs={12} sm={6} md={4} key={ele._id}>
+        {careTakers.map((caretaker) => (
+          <Grid item xs={12} sm={6} md={4} key={caretaker._id}>
             <Card sx={{ maxWidth: 345 }}>
               <CardMedia
                 component="img"
                 height="140"
-                image={ele.photo || 'default-image-url'}
+                image={caretaker.photo || 'default-image-url'}
                 alt="Profile"
               />
               <CardContent>
-                {ele.userId ? (
+                {caretaker.userId ? (
                   <>
                     <Typography variant="h6" gutterBottom>
-                      {ele.userId.username}
+                      {caretaker.userId.username}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Email: {ele.userId.email}
+                      Email: {caretaker.userId.email}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Phone: {ele.userId.phoneNumber}
+                      Phone: {caretaker.userId.phoneNumber}
                     </Typography>
                   </>
                 ) : (
@@ -117,18 +154,18 @@ const CareTakerAll = () => {
                   </Typography>
                 )}
                 <Typography variant="body1" gutterBottom>
-                  Business Name: {ele.businessName}
+                  Business Name: {caretaker.businessName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Address: {ele.address}
+                  Address: {caretaker.address}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Bio: {ele.bio}
+                  Bio: {caretaker.bio}
                 </Typography>
                 <Typography variant="h6" gutterBottom>
                   Services:
                 </Typography>
-                {ele.serviceCharges.map((charge, index) => (
+                {caretaker.serviceCharges.map((charge, index) => (
                   <Typography key={index} variant="body2" color="text.secondary">
                     <div>Service Name: {charge.specialityName}</div>
                     <div>Service Amount: {charge.amount}</div>
@@ -141,7 +178,7 @@ const CareTakerAll = () => {
                 <CardMedia
                   component="img"
                   height="140"
-                  image={ele.photo}
+                  image={caretaker.photo}
                   alt="Profile"
                 />
                 <Typography variant="h6" gutterBottom>
@@ -150,14 +187,14 @@ const CareTakerAll = () => {
                 <CardMedia
                   component="img"
                   height="140"
-                  image={ele.proof}
+                  image={caretaker.proof}
                   alt="Proof"
                 />
-                {ele.userId && ele.userId._id && userRole !== 'admin' && (
+                {caretaker.userId && caretaker.userId._id && userRole !== 'admin' && (
                   <>
                     <Button
                       component={Link}
-                      to={`/caretaker-account/${ele._id}`}
+                      to={`ctverified-single/${caretaker._id}`}
                       variant="contained"
                       color="primary"
                       sx={{ marginTop: 2 }}
@@ -167,10 +204,10 @@ const CareTakerAll = () => {
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={() => handleOpenDialog(ele)}
+                      onClick={() => handleVerifyCaretaker(caretaker._id)}
                       sx={{ marginTop: 2, marginLeft: 1 }}
                     >
-                      Total Bookings
+                      Verify
                     </Button>
                   </>
                 )}
@@ -185,16 +222,18 @@ const CareTakerAll = () => {
         <DialogContent>
           {bookingDetails ? (
             <Box>
-              <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                Average Rating:
-                <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 1 }}>
-                  <StarRating
-                    rating={bookingDetails.averageRating}
-                    onChange={() => {}}
-                    editable={false} // Pass editable=false to make it read-only
-                  />
-                </Box>
-              </Typography>
+              {bookingDetails.averageRating && (
+                <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                  Average Rating:
+                  <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 1 }}>
+                    <StarRating
+                      rating={bookingDetails.averageRating}
+                      onChange={() => {}}
+                      editable={false} // Pass editable=false to make it read-only
+                    />
+                  </Box>
+                </Typography>
+              )}
               <Typography variant="h6">
                 Total Bookings: {bookingDetails.bookingsCount}
               </Typography>
@@ -203,6 +242,19 @@ const CareTakerAll = () => {
             <CircularProgress />
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={confirmOpen} onClose={handleConfirmClose}>
+        <DialogTitle>Verify Caretaker</DialogTitle>
+        <DialogContent>
+          Are you sure you want to verify this caretaker?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmClose}>Cancel</Button>
+          <Button onClick={handleConfirmVerify} color="primary" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

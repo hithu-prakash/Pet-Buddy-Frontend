@@ -151,11 +151,13 @@ export default function PetParentAccount(){
                     <button onClick={() => navigate(`/update-petparent/${petParent._id}`)}>Update your Profile</button>
                     <button onClick={handleDelete}>Delete your Profile</button>
                     <button onClick={() => navigate(`/create-pet/`)}>Add Pet Details</button>
+                    <button onClick={()=>navigate(`/booking-history`)}>Booking History</button>
                 </div>
             ) : (
                 <div>
                     <p>No PetParent profile found.</p>
                     <button onClick={() => navigate(`/create-petparent`)}>Create PetParent Profile</button>
+                   
                 </div>
             )}
             <ToastContainer />

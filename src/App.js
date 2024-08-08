@@ -21,14 +21,20 @@ import PetParentList from "./components/petParent/pet-Parent-All"
 import PetParentId from "./components/petParent/pet-parent-Id"
 
 //'------------careTaker----------------------'
-import CareTakerForm from "./components/careTaker/careTaker-Form"
-import CareTakerAccount from "./components/careTaker/careTaker-Account";
-import CareTakerUpdate from "./components/careTaker/careTaker-update"
-import CareTakerAll from "./components/careTaker/careTaker-All"
-import CareTakerShowOne from "./components/careTaker/careTaker-showone-id";
-import CareTakerSingleDetails from "./components/careTaker/careTaker-showone-id";
+// import CareTakerForm from "./components/careTaker/careTaker-Form"
+// import CTSingleAdminAccount from "./components/careTaker/careTaker-Admin-single";
+// import CareTakerSingleDetail from "./components/careTaker/careTaker-single"
+// import CareTakerUpdate from "./components/careTaker/careTaker-update"
+// import CareTakerVerifiedAll from "./components/careTaker/careTaker-Verifed-All"
+// import CareTakerShowOne from "./components/careTaker/careTaker-AdminV-showOne";
 
+// import CareTakerDetailsView from "./components/careTaker/careTaker-single-admin"
 
+import CreateCareForm from "./components/Care-Taker/Caretaker-create"
+import CareTakerAccount from "./components/Care-Taker/Caretaker-Account"
+import CareTakerAll from "./components/Care-Taker/Caretaker-All"
+import CareTakerSingleDetails from "./components/Care-Taker/Caretaker-ID"
+import CareTakerUpdate from "./components/Care-Taker/Caretaker-update"
 //'------------Pet----------------------'
 import PetForm from "./components/Pet/pet-Form";
 import PetAccount from "./components/Pet/Pet-Account";
@@ -48,14 +54,17 @@ import AllBooking from "./components/booking/booking-history"
 import CreateReview from "./components/review/createReview"
 import ReviewList from "./components/review/allReview"
 import SingleCaretakerReviews from "./components/review/singlereview-Id"
-
+import UpdateReview from "./components/review/updateReview"
+import SingleReviews from "./components/review/singlereview"
+// import SingleUD from "./components/review/single-UD";
 
 //'-----------------admin--------------------'
 import CaretakerList from "./components/admin/careTakerAll"
+import CTVerifyedSingle from "./components/admin/careTaker-Verfied-one"
 import PetParentsList from "./components/admin/petParentsAll"
 import PetsByParent from "./components/admin/petAll"
 import AdminHomePage from "./components/admin/admin-homePage";
-import HappyParents from "./components/admin/HappyParents";
+
 
 
 function App() {
@@ -119,7 +128,7 @@ function App() {
   |<Link to="/all-review">ReviewList</Link>
  
  
-  |<Link to='/showcareTaker-one'>CareTakerAccount</Link>
+  |<Link to='/singleOneCareTaker'>CareTakerAccount</Link>
   |<Link to='/caretaker-account/:id'>CareTakerDetails</Link>
   |<Link to='/pet-account'>PetAccount</Link>
   
@@ -140,12 +149,25 @@ function App() {
   <Route path="/reset-password" element={<ResetPassword/>}/>
   <Route path="/account" element={<Account/>}/>
 
-  <Route path="/create-caretaker" element={<CareTakerForm/>}/>
+  <Route path="/create-caretaker" element={<CreateCareForm/>}/>
   <Route path="/caretaker-account/:id" element={<CareTakerAccount/>}/>
   <Route path="/update-caretaker/:id" element={<CareTakerUpdate/>}/>
   <Route path="/caretaker-all" element={<CareTakerAll/>}/>
   {/* <Route path="/showcareTaker/:id" element={<CareTakerShowOne/>}/> */}
   <Route path="/caretaker-single/:id" element={<CareTakerSingleDetails/>}/>
+
+
+
+
+{/* 
+  <Route path="/create-caretaker" element={<CareTakerForm/>}/>
+  <Route path="/Admin-Caretaker-account/:id" element={<CTSingleAdminAccount/>}/> 
+  <Route path="/singleOneCareTaker" element={<CareTakerSingleDetail/>}/>
+
+  <Route path="/update-caretaker/:id" element={<CareTakerUpdate/>}/>
+  <Route path="/caretaker-Verified-all" element={<CareTakerVerifiedAll/>}/>
+  <Route path="/showcareTaker/:id" element={<CareTakerShowOne/>}/>
+   <Route path="/admin-caretaker/:id" element={<CareTakerDetailsView/>}/> */}
 
   <Route path="/create-petparent" element={<PetParentForm/>}/>
   <Route path="/petparent-account" element={<PetParentAccount/>}/>
@@ -155,7 +177,7 @@ function App() {
 
 
   <Route path="/create-pet" element={<PetForm/>}/>
-  <Route path='/pet-account' element={<PetAccount/>} />
+  <Route path='/pet-account/:id' element={<PetAccount/>} />
   <Route path="/update-pet/:id" element={<PetUpdate/>}/>
 
   <Route path="/create-booking/:id" element={<BookingForm/>} />
@@ -163,16 +185,20 @@ function App() {
 
 
   <Route path="/create-review/:id" element={<CreateReview/>}/>
+  <Route path="/review/:reviewId" element={<SingleReviews/>}/>
+  <Route path="/update-review/:reviewId" element={<UpdateReview/>}/>
   <Route path="/all-review" element={<ReviewList/>}/>
-  <Route path="/singleReview/:caretakerId" element={<SingleCaretakerReviews/>}/>
-
+  <Route path="/singleReview/:reviewId" element={<SingleCaretakerReviews />} /> 
+  
+  
 
   <Route path="/careTaker-false" element={<CaretakerList/>} />
+  <Route path="/ctverified-single/:id" element={<CTVerifyedSingle/>}/>
   <Route path="/parent-all" element={<PetParentsList/>}/>
   <Route path="/pets/by-parent/:petParentId" element={<PetsByParent/>}/>
   <Route path="/pet/showAll" element={<ShowAllPets/>}/>
   <Route path="/admin-homePage" element={<AdminHomePage/>}/>
-  <Route path="/happy-Parents" element={<HappyParents/>}/>
+  
 
 
 </Routes>

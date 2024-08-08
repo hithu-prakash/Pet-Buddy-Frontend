@@ -72,10 +72,9 @@ export default function PetParentUpdate(){
             try {
                 const formData = new FormData();
                 formData.append('address', form.address);
-                if (form.photo) formData.append('photo', form.parentphoto);
-                if (form.proof) formData.append('proof', form.proof);
-
-                // const token = localStorage.getItem('token');
+                if (form.photo) formData.append('parentPhoto', form.photo);  // Ensure the name matches the backend field
+                if (form.proof) formData.append('proof', form.proof);  // Ensure the name matches the backend field
+    
                 const response = await axios.put(`/petParent/update/${id}`, formData, {
                     headers: {
                         'Authorization': localStorage.getItem('token'),
@@ -85,8 +84,8 @@ export default function PetParentUpdate(){
                 console.log(response.data);
                 setLoading(false);
                 toast.success("Profile Updated successfully.");
-                navigate('/single-petparent'); // Redirect to a different page
-
+                navigate('/petparent-account'); // Redirect to a different page
+    
             } catch (err) {
                 const serverErrors = err.response && err.response.data ? err.response.data.errors : 'An unexpected error occurred';
                 setForm(prevForm => ({ ...prevForm, serverErrors }));
@@ -96,7 +95,7 @@ export default function PetParentUpdate(){
             setForm(prevForm => ({ ...prevForm, clientErrors: errors }));
         }
     };
-
+    
     const displayErrors = () => {
         if (form.serverErrors) {
             if (Array.isArray(form.serverErrors)) {

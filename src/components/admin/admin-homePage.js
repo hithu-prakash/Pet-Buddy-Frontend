@@ -70,7 +70,7 @@ export default function Home() {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => navigate('/caretaker-all')}
+                        onClick={() => navigate('/caretaker-Verified-all')}
                     >
                         Verified Caretakers
                     </Button>

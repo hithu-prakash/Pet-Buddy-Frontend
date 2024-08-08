@@ -1,11 +1,11 @@
-import {
-  CREATE_REVIEW_REQUEST,
-  CREATE_REVIEW_SUCCESS,
-  CREATE_REVIEW_FAILURE,
+import { 
+  CREATE_REVIEW_REQUEST, 
+  CREATE_REVIEW_SUCCESS, 
+  CREATE_REVIEW_FAILURE, 
   FETCH_REVIEWS_REQUEST,
   FETCH_REVIEWS_SUCCESS,
-  FETCH_REVIEWS_FAILURE,
-} from '../actions/reviewAction';
+  FETCH_REVIEWS_FAILURE 
+} from '../actions/reviewTypes'; // Import from reviewConstants
 
 const initialState = {
   loading: false,
@@ -29,7 +29,7 @@ const reviewReducer = (state = initialState, action) => {
         review: action.payload,
         error: '',
       };
-    case CREATE_REVIEW_FAILURE:
+    case CREATE_REVIEW_FAILURE: // Corrected from CREATE_REVIEW_FAIL
       return {
         ...state,
         loading: false,

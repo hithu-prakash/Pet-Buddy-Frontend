@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../config/axios';
-import { Container, Typography, Card, CardContent, CircularProgress, Grid, Button } from '@mui/material';
+import { Container, Typography, Card, CardContent, CircularProgress, Grid, Button, Box } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,6 +47,10 @@ export default function ReviewsList() {
     navigate(`/singleReview/${caretakerId}`);
   };
 
+  const handleViewCaretakerDetails = (caretakerId) => {
+    navigate(`/caretaker-account/${caretakerId}`);
+  };
+
   return (
     <Container>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -83,18 +87,25 @@ export default function ReviewsList() {
                     style={{ width: '100%', marginTop: '10px' }}
                   />
                 )}
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                  Caretaker: {review.caretakerId.businessName}
-                </Typography>
+                {review.caretakerId && (
+                  <Box display="flex" alignItems="center" sx={{ mt: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                      Caretaker:
+                    </Typography>
+                    <Button
+                      onClick={() => handleViewCaretakerDetails(review.caretakerId._id)}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      {review.caretakerId.businessName}
+                    </Button>
+                  </Box>
+                )}
                 <Typography variant="body2" color="text.secondary">
                   {/* Pet: {review.petId.petName} */}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Rating: {review.ratings}
                 </Typography>
-                <Button variant="contained" color="primary" onClick={() => handleViewDetails(review.caretakerId._id)}>
-                  View Details
-                </Button>
               </CardContent>
             </Card>
           </Grid>

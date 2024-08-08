@@ -101,7 +101,7 @@ export default function CreateCareForm() {
                 const id=response.data._id
                 console.log(id)
                 toast.success('CareTaker created successfully!');
-                navigate(`/singleOneCareTaker`);
+                navigate(`/caretaker-account/${id}`);
         
             } catch (err) {
                 console.error('Submit Error:', err);
@@ -172,7 +172,7 @@ export default function CreateCareForm() {
                         </select> <br/>
                         {/* <input type='text' value={charge.specialityName} onChange={(e) => handleServiceChargeChange(index, e)} name='specialityName' placeholder='Service Name' /><br /> */}
                         <input type='text' value={charge.amount} onChange={(e) => handleServiceChargeChange(index, e)} name='amount' placeholder='Amount' /><br />
-                        <input type='text' value={charge.time} onChange={(e) => handleServiceChargeChange(index, e)} name='time' placeholder='Time (hours)'  min='1' step='0.5' /><br />
+                        <input type='text' value={charge.time} onChange={(e) => handleServiceChargeChange(index, e)} name='time' placeholder='Time' /><br />
                         {index > 0 && <button type='button' onClick={() => handleRemoveServiceCharge(index)}>Remove</button>}
                     </div>
                 ))}

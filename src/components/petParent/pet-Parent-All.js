@@ -61,7 +61,7 @@ export default function PetParentList(){
               <img src={petParent.proof} alt="Proof" style={{ maxWidth: '200px' }} />
             )}
           </div>
-          <Link to={`/single-petparent`}>View Details</Link>
+          <Link to={`/petparent-account`}>View Details</Link>
         </div>
       ))}
     </div>

@@ -21,6 +21,7 @@ export default function PetUpdate() {
     medication: [{ medicationName: '', description: '', dueDate: '', dose: '' }],
     reminders: [{ date: '', title: '', note: '' }],
   });
+  
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ export default function PetUpdate() {
   useEffect(() => {
     const fetchPetData = async () => {
       try {
-        const response = await axios.get(`/pet/singlePet`, {
+        const response = await axios.get(`/pet/singlePet/${id}`, {
           headers: { Authorization: localStorage.getItem('token') },
         });
         console.log(response.data)
@@ -53,7 +54,7 @@ export default function PetUpdate() {
       }
     };
 
-    fetchPetData();
+    fetchPetData(id);
   }, [id]);
 
   const handleChange = (e) => {
@@ -118,7 +119,7 @@ export default function PetUpdate() {
       });
       console.log(response.data);
       toast.success('Pet details updated successfully!');
-      navigate('/pet-account');
+      navigate(`/pet-account/${id}`)
     } catch (err) {
       console.error(err);
       setError({ fetch: 'Something went wrong' });

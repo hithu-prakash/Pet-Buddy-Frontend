@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from '../../config/axios'; // Adjust the path as needed
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function PetForm() {
   const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ export default function PetForm() {
     gender: '',
     categories: '',
     breed: '',
-    petPhoto: null, // Use null initially
+    petPhoto: null,
     weight: '',
     vaccinated: false,
     medication: [{ medicationName: '', description: '', dueDate: '', dose: '' }],
@@ -25,7 +25,7 @@ export default function PetForm() {
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-  
+
     if (type === 'checkbox') {
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (type === 'file') {
@@ -44,7 +44,6 @@ export default function PetForm() {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleToggleMedicationDetails = () => {
     setShowMedicationDetails((prev) => !prev);
@@ -74,9 +73,10 @@ export default function PetForm() {
           Authorization: localStorage.getItem('token'),
         },
       });
+      const petId = response.data._id; // Assuming response.data contains the pet ID
       console.log(response.data);
-      toast.success('Pet Account created successfully!');
-      navigate('/pet-account');
+      toast.success('Pet account created successfully!');
+      navigate(`/pet-account/${petId}`); // Navigate using the retrieved pet ID
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
     }

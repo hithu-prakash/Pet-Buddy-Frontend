@@ -1,11 +1,135 @@
 
+// import React, { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import axios from '../../config/axios';
+// import { toast, ToastContainer } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+
+// const CareTakerDetails = () => {
+//     const [careTaker, setCareTaker] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState(null);
+//     const navigate = useNavigate();
+
+//     useEffect(() => {
+//         const fetchCareTaker = async () => {
+//             try {
+//                 const response = await axios.get('/careTaker/single-care-taker', {
+//                     headers: {
+//                         Authorization: localStorage.getItem('token'),
+//                     },
+//                 });
+//                 setCareTaker(response.data);
+//                 setLoading(false);
+//             } catch (error) {
+//                 console.error(error.message);
+//                 setError('Something went wrong');
+//                 setLoading(false);
+//             }
+//         };
+
+//         fetchCareTaker();
+//     }, []);
+
+//     const handleDelete = async () => {
+//         if (window.confirm("Are you sure you want to delete your profile?")) {
+//             try {
+//                 const token = localStorage.getItem('token');
+//                 const response = await axios.delete(`/api/deletecaretaker/${careTaker._id}`, {
+//                     headers: {
+//                         Authorization: ` ${token}`
+//                     }
+//                 });
+
+//                 if (response.status === 200) {
+//                     toast.success("Profile deleted successfully.");
+//                     alert("Profile deleted successfully.");
+//                     setCareTaker('')
+//                     navigate('/single-caretaker'); // Redirect after successful deletion
+//                 }
+//             } catch (error) {
+//                 alert("Failed to delete profile. Please try again.");
+//                 console.error(error.message);
+//             }
+//         }
+//     };
+
+
+//     if (loading) return <div>Loading...</div>;
+//     if (error) return <div>{error}</div>;
+
+//     return (
+//         <div>
+//             <h2>CareTaker Details</h2>
+//             {careTaker.careTakerBusinessName ? (
+//                 <div className='care-taker-card'>
+//                     {careTaker.userId ? (
+//                         <>
+//                             <p>Username: <b>{careTaker.userId.username}</b></p>
+//                             <p>Email: {careTaker.userId.email}</p>
+//                             <p>Phone: {careTaker.userId.phoneNumber}</p>
+//                         </>
+//                     ) : (
+//                         <p>User Information not available</p>
+//                     )}
+//                     <p>Care-Taker Business Name: {careTaker.careTakerBusinessName}</p>
+//                     <p>Address: {careTaker.address}</p>
+//                     <p>Bio: {careTaker.bio}</p>
+//                     <div>
+//                         <h3>Services:</h3>
+//                         {careTaker.serviceCharges && careTaker.serviceCharges.length > 0 ? (
+//                             careTaker.serviceCharges.map((charge, index) => (
+//                                 <div key={index}>
+//                                     <p>Service Name: {charge.name}</p>
+//                                     <p>Service Amount: {charge.amount}</p>
+//                                     <p>Service Time: {charge.time}</p>
+//                                 </div>
+//                             ))
+//                         ) : (
+//                             <p>No services available</p>
+//                         )}
+//                     </div>
+//                     <div>
+//                         <h3>Profile Photo</h3>
+//                         <img src={careTaker.photo} alt='Profile' style={{ maxWidth: '200px' }} />
+//                     </div>
+//                     <div>
+//                         <h3>Proof Document</h3>
+//                         {careTaker.proof ? (
+//                             careTaker.proof.endsWith('.pdf') ? (
+//                                 <a href={careTaker.proof} target='_blank' rel='noreferrer'>View PDF</a>
+//                             ) : (
+//                                 <img src={careTaker.proof} alt='Proof' style={{ maxWidth: '200px' }} />
+//                             )
+//                         ) : (
+//                             <p>No proof document available</p>
+//                         )}
+//                     </div>
+//                     <button onClick={() => navigate(`/update-caretaker/${careTaker._id}`)}>Update your Profile</button>
+//                     <button onClick={handleDelete}>Delete your Profile</button>
+
+//                     <button onClick={()=> navigate(`/all-booking-caretaker`)}>View all My Booking</button>
+//                 </div>
+//             ) : (
+//                 <div>
+//                     <p>No CareTaker profile found.</p>
+//                     <button onClick={() => navigate(`/create-caretaker`)}>Create Care-Taker Profile</button>
+//                 </div>
+//             )}
+//             <ToastContainer />
+//         </div>
+//     );
+// };
+
+// export default CareTakerDetails;
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CareTakerDetails = () => {
+const CareTakerSingleDetail = () => {
     const [careTaker, setCareTaker] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,6 +143,7 @@ const CareTakerDetails = () => {
                         Authorization: localStorage.getItem('token'),
                     },
                 });
+                console.log(response.data); // Inspect the careTaker object
                 setCareTaker(response.data);
                 setLoading(false);
             } catch (error) {
@@ -32,10 +157,10 @@ const CareTakerDetails = () => {
     }, []);
 
     const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete your profile?")) {
+        if (window.confirm("Are you sure you want to delete your profile? Your account details will be permanently lost.")) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.delete(`/api/deletecaretaker/${careTaker._id}`, {
+                const response = await axios.delete(`/careTaker/${careTaker._id}`, {
                     headers: {
                         Authorization: ` ${token}`
                     }
@@ -44,7 +169,7 @@ const CareTakerDetails = () => {
                 if (response.status === 200) {
                     toast.success("Profile deleted successfully.");
                     alert("Profile deleted successfully.");
-                    setCareTaker('')
+                    setCareTaker(null);
                     navigate('/single-caretaker'); // Redirect after successful deletion
                 }
             } catch (error) {
@@ -54,14 +179,13 @@ const CareTakerDetails = () => {
         }
     };
 
-
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
     return (
         <div>
             <h2>CareTaker Details</h2>
-            {careTaker.careTakerBusinessName ? (
+            {careTaker ? (
                 <div className='care-taker-card'>
                     {careTaker.userId ? (
                         <>
@@ -72,7 +196,7 @@ const CareTakerDetails = () => {
                     ) : (
                         <p>User Information not available</p>
                     )}
-                    <p>Care-Taker Business Name: {careTaker.careTakerBusinessName}</p>
+                    <p>Business Name: {careTaker.businessName}</p>
                     <p>Address: {careTaker.address}</p>
                     <p>Bio: {careTaker.bio}</p>
                     <div>
@@ -80,7 +204,7 @@ const CareTakerDetails = () => {
                         {careTaker.serviceCharges && careTaker.serviceCharges.length > 0 ? (
                             careTaker.serviceCharges.map((charge, index) => (
                                 <div key={index}>
-                                    <p>Service Name: {charge.name}</p>
+                                    <p>Service Name: {charge.specialityName}</p>
                                     <p>Service Amount: {charge.amount}</p>
                                     <p>Service Time: {charge.time}</p>
                                 </div>
@@ -107,8 +231,7 @@ const CareTakerDetails = () => {
                     </div>
                     <button onClick={() => navigate(`/update-caretaker/${careTaker._id}`)}>Update your Profile</button>
                     <button onClick={handleDelete}>Delete your Profile</button>
-
-                    <button onClick={()=> navigate(`/all-booking-caretaker`)}>View all My Booking</button>
+                    <button onClick={() => navigate(`/all-booking-caretaker`)}>View all My Booking</button>
                 </div>
             ) : (
                 <div>
@@ -121,4 +244,4 @@ const CareTakerDetails = () => {
     );
 };
 
-export default CareTakerDetails;
+export default CareTakerSingleDetail;
